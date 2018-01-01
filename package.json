@@ -1,0 +1,37 @@
+{
+  "name": "minnie-janus",
+  "version": "0.6.0",
+  "description": "A small, modern, transparent JavaScript interface for the Janus WebRTC gateway API, for browsers as well as Node.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Michael Karl Franzl",
+  "license": "MIT",
+  "dependencies": {
+    "@michaelfranzl/captain-hook": "npm:@michaelfranzl/captain-hook@^1.0.2",
+    "@stamp/it": "npm:@stamp/it@^1.0.1"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "jspm": "^0.17.0-beta.41",
+    "live-server": "^1.2.0",
+    "systemjs": "^0.20.19"
+  },
+  "jspm": {
+    "name": "minnie-janus",
+    "dependencies": {
+      "@michaelfranzl/captain-hook": "npm:@michaelfranzl/captain-hook@^1.0.2",
+      "@stamp/it": "npm:@stamp/it@^1.0.1",
+      "webrtc-adapter": "npm:webrtc-adapter@^6.0.3"
+    },
+    "devDependencies": {
+      "plugin-babel": "npm:systemjs-plugin-babel@^0.0.25"
+    },
+    "peerDependencies": {
+      "assert": "npm:jspm-nodelibs-assert@^0.2.0",
+      "fs": "npm:jspm-nodelibs-fs@^0.2.0",
+      "os": "npm:jspm-nodelibs-os@^0.2.0",
+      "process": "npm:jspm-nodelibs-process@^0.2.0"
+    }
+  }
+}
