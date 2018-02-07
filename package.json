@@ -8,8 +8,8 @@
   "author": "Michael Karl Franzl",
   "license": "MIT",
   "dependencies": {
-    "@michaelfranzl/captain-hook": "npm:@michaelfranzl/captain-hook@^1.0.2",
-    "@stamp/it": "npm:@stamp/it@^1.0.1"
+    "@michaelfranzl/captain-hook": "^1.0.2",
+    "@stamp/it": "^1.0.1"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
