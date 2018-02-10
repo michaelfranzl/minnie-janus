@@ -29,7 +29,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 import EventEmitter from '@michaelfranzl/captain-hook';
 
-
 var props = {
   id: null,      // server-side session ID
   next_tx_id: 0, // used to generate unique transaction identifier strings
@@ -44,24 +43,7 @@ var deepProps = {
 };
 
 
-var LOG_WARN = -1;
-var LOG_ERR = -2;
-var LOG_INFO = 0;
-var LOG_DEBUG = 1;
-
-
-
 var methods = {
-  
-  /**
-   * Session-specific log method.
-   * 
-   * Creates scoped logging events for whoever is subscribed.
-   */
-  log(level, ...args) {
-    this._emit('log', level, `session(${this.id})`, ...args);
-  },
-
   /**
    * Create this session on the server.
    * 
@@ -76,7 +58,7 @@ var methods = {
       return response;
     })
     .catch(err => {
-      this.log(LOG_ERR, `Exception during creating session ${this.id}`, err);
+      this.log.error(`Exception during creating session ${this.id}`, err);
       throw err; // re-throw
     });
   },
@@ -89,7 +71,7 @@ var methods = {
   destroy() {
     let plugin_detach_promises = Object.keys(this.plugins).map(id => {
       let plugin = this.plugins[id];
-      this.log(LOG_DEBUG, `Detaching plugin before destroying session`, plugin.name);
+      this.log.debug(`Detaching plugin before destroying session`, plugin.name);
       return plugin.detach();
     });
     
@@ -97,7 +79,7 @@ var methods = {
     .then(() =>  this.send({ janus: "destroy" }))
     .then(() => this._stopKeepalive())
     .catch(err => {
-      this.log(LOG_ERR, 'Exception during destroying session', err);
+      this.log.error('Exception during destroying session', err);
       throw err; // re-throw
     });
   },
@@ -112,24 +94,24 @@ var methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response takes too long. Resolved otherwise.
    */
   attachPlugin(plugin) {
-    this.log(LOG_DEBUG, `Attaching plugin ${plugin.name}`);
+    this.log.debug(`Attaching plugin ${plugin.name}`);
     
     plugin.on('log', (...args) => this.log(...args));
     
     plugin.on('detached', response => {
-      this.log(LOG_DEBUG, `Plugin ${plugin.name} detached. Removing reference ${plugin.id} from ${Object.keys(this.plugins)}.`);
+      this.log.debug(`Plugin ${plugin.name} detached. Removing reference ${plugin.id} from ${Object.keys(this.plugins)}.`);
       delete this.plugins[plugin.id];
     });
     
     return plugin.attach(this)
     .then(response => {
       
-      this.log(LOG_INFO, `Plugin ${plugin.name} attached.`);
+      this.log.info(`Plugin ${plugin.name} attached.`);
       this.plugins[response.data.id] = plugin;
       this._emit('plugin_attached', response);
     })
     .catch(err => {
-      this.log(LOG_ERR, `Exception during attaching ${plugin.name}`, err);
+      this.log.error(`Exception during attaching ${plugin.name}`, err);
       throw err;
     });
   },
@@ -144,11 +126,11 @@ var methods = {
    * @param {Object} msg - Object parsed from server-side JSON
    */
   receive(msg) {
-    this.log(LOG_DEBUG, "Receiving message from Janus", msg);
+    this.log.debug("Receiving message from Janus", msg);
     
     if (msg.session_id != this.id) {
       // This should never happen when parent app does its job properly.
-      this.log(LOG_WARN, "Message not for this session instance", msg);
+      this.log.warn("Message not for this session instance", msg);
       return;
     }
     
@@ -163,7 +145,7 @@ var methods = {
         clearTimeout(txn.timeout);
         delete this.txns[msg.transaction];
         if (msg.janus == 'error') {
-          this.log(LOG_ERR, `Got error ${msg.error.code} from Janus. Will reject promise.`, msg.error.reason);
+          this.log.error(`Got error ${msg.error.code} from Janus. Will reject promise.`, msg.error.reason);
         }
         (msg.janus == 'error' ? txn.reject : txn.resolve)(msg);
         return;
@@ -181,7 +163,7 @@ var methods = {
       let plugin = this.plugins[plugin_id];
       plugin.receive(msg);
     } else {
-      this.log(LOG_ERR, `Could not find plugin that sent this transaction.`);
+      this.log.error(`Could not find plugin that sent this transaction.`);
     }
   },
   
@@ -207,7 +189,7 @@ var methods = {
     }
     msg = Object.assign({ transaction: (this.next_tx_id++).toString() }, msg);
     
-    this.log(LOG_DEBUG, "Outgoing Janus message", msg);
+    this.log.debug("Outgoing Janus message", msg);
     
     return new Promise((resolve, reject) => {
       let timeout = setTimeout(() => {
@@ -231,20 +213,20 @@ var methods = {
    * Call this before unreferencing an instance.
    */
   stop() {
-    this.log(LOG_DEBUG, `stop()`);
+    this.log.debug(`stop()`);
     this._stopKeepalive();
   },
   
   _sendKeepalive() {
     return this.send({ janus: "keepalive" })
     .catch(err => {
-      this.log(LOG_ERR, `Keepalive timed out`);
+      this.log.error(`Keepalive timed out`);
       this._emit('keepalive_timout');
     });
   },
   
   _stopKeepalive() {
-    this.log(LOG_DEBUG, '_stopKeepalive()');
+    this.log.debug('_stopKeepalive()');
     if (this.keepalive_timeout) {
       clearTimeout(this.keepalive_timeout);
     }
@@ -265,7 +247,9 @@ Object.assign(methods, EventEmitter());
 function init({
   timeout_ms = 5000,
   keepalive_ms = 50000,
+  log = console
 } = {}) {
+  this.log = log;
   this.options.timeout_ms = timeout_ms;
   this.options.keepalive_ms = keepalive_ms;
 }

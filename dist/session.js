@@ -459,15 +459,18 @@ $__System.registerDynamic('15', ['d', '13', '10', 'c', 'f', '12', '11'], true, f
 $__System.register('a', ['15'], function (_export, _context) {
   "use strict";
 
-  var stampit, _defineProperty, CaptainHook$1, props, deepProps, LOG_WARN, LOG_ERR, LOG_INFO, LOG_DEBUG, methods, sessionStamp;
+  var stampit, _defineProperty, CaptainHook$1, props, deepProps, methods, sessionStamp;
 
   function init() {
     var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
         _ref$timeout_ms = _ref.timeout_ms,
         timeout_ms = _ref$timeout_ms === undefined ? 5000 : _ref$timeout_ms,
         _ref$keepalive_ms = _ref.keepalive_ms,
-        keepalive_ms = _ref$keepalive_ms === undefined ? 50000 : _ref$keepalive_ms;
+        keepalive_ms = _ref$keepalive_ms === undefined ? 50000 : _ref$keepalive_ms,
+        _ref$log = _ref.log,
+        log = _ref$log === undefined ? console : _ref$log;
 
+    this.log = log;
     this.options.timeout_ms = timeout_ms;
     this.options.keepalive_ms = keepalive_ms;
   }
@@ -696,25 +699,7 @@ $__System.register('a', ['15'], function (_export, _context) {
         options: {}, // see initializer
         plugins: {} // plugin instances by plugin IDs
       };
-      LOG_WARN = -1;
-      LOG_ERR = -2;
-      LOG_INFO = 0;
-      LOG_DEBUG = 1;
       methods = {
-
-        /**
-         * Session-specific log method.
-         * 
-         * Creates scoped logging events for whoever is subscribed.
-         */
-        log: function log(level) {
-          for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-            args[_key - 1] = arguments[_key];
-          }
-
-          this._emit.apply(this, ['log', level, 'session(' + this.id + ')'].concat(args));
-        },
-
         /**
          * Create this session on the server.
          * 
@@ -729,7 +714,7 @@ $__System.register('a', ['15'], function (_export, _context) {
             _this.id = response.data.id;
             return response;
           }).catch(function (err) {
-            _this.log(LOG_ERR, 'Exception during creating session ' + _this.id, err);
+            _this.log.error("Exception during creating session " + _this.id, err);
             throw err; // re-throw
           });
         },
@@ -744,7 +729,7 @@ $__System.register('a', ['15'], function (_export, _context) {
 
           var plugin_detach_promises = Object.keys(this.plugins).map(function (id) {
             var plugin = _this2.plugins[id];
-            _this2.log(LOG_DEBUG, 'Detaching plugin before destroying session', plugin.name);
+            _this2.log.debug("Detaching plugin before destroying session", plugin.name);
             return plugin.detach();
           });
 
@@ -753,7 +738,7 @@ $__System.register('a', ['15'], function (_export, _context) {
           }).then(function () {
             return _this2._stopKeepalive();
           }).catch(function (err) {
-            _this2.log(LOG_ERR, 'Exception during destroying session', err);
+            _this2.log.error('Exception during destroying session', err);
             throw err; // re-throw
           });
         },
@@ -770,24 +755,24 @@ $__System.register('a', ['15'], function (_export, _context) {
         attachPlugin: function attachPlugin(plugin) {
           var _this3 = this;
 
-          this.log(LOG_DEBUG, 'Attaching plugin ' + plugin.name);
+          this.log.debug("Attaching plugin " + plugin.name);
 
           plugin.on('log', function () {
             return _this3.log.apply(_this3, arguments);
           });
 
           plugin.on('detached', function (response) {
-            _this3.log(LOG_DEBUG, 'Plugin ' + plugin.name + ' detached. Removing reference ' + plugin.id + ' from ' + Object.keys(_this3.plugins) + '.');
+            _this3.log.debug("Plugin " + plugin.name + " detached. Removing reference " + plugin.id + " from " + Object.keys(_this3.plugins) + ".");
             delete _this3.plugins[plugin.id];
           });
 
           return plugin.attach(this).then(function (response) {
 
-            _this3.log(LOG_INFO, 'Plugin ' + plugin.name + ' attached.');
+            _this3.log.info("Plugin " + plugin.name + " attached.");
             _this3.plugins[response.data.id] = plugin;
             _this3._emit('plugin_attached', response);
           }).catch(function (err) {
-            _this3.log(LOG_ERR, 'Exception during attaching ' + plugin.name, err);
+            _this3.log.error("Exception during attaching " + plugin.name, err);
             throw err;
           });
         },
@@ -801,11 +786,11 @@ $__System.register('a', ['15'], function (_export, _context) {
          * @param {Object} msg - Object parsed from server-side JSON
          */
         receive: function receive(msg) {
-          this.log(LOG_DEBUG, "Receiving message from Janus", msg);
+          this.log.debug("Receiving message from Janus", msg);
 
           if (msg.session_id != this.id) {
             // This should never happen when parent app does its job properly.
-            this.log(LOG_WARN, "Message not for this session instance", msg);
+            this.log.warn("Message not for this session instance", msg);
             return;
           }
 
@@ -820,7 +805,7 @@ $__System.register('a', ['15'], function (_export, _context) {
               clearTimeout(txn.timeout);
               delete this.txns[msg.transaction];
               if (msg.janus == 'error') {
-                this.log(LOG_ERR, 'Got error ' + msg.error.code + ' from Janus. Will reject promise.', msg.error.reason);
+                this.log.error("Got error " + msg.error.code + " from Janus. Will reject promise.", msg.error.reason);
               }
               (msg.janus == 'error' ? txn.reject : txn.resolve)(msg);
               return;
@@ -838,7 +823,7 @@ $__System.register('a', ['15'], function (_export, _context) {
             var plugin = this.plugins[plugin_id];
             plugin.receive(msg);
           } else {
-            this.log(LOG_ERR, 'Could not find plugin that sent this transaction.');
+            this.log.error("Could not find plugin that sent this transaction.");
           }
         },
 
@@ -865,12 +850,12 @@ $__System.register('a', ['15'], function (_export, _context) {
           }
           msg = Object.assign({ transaction: (this.next_tx_id++).toString() }, msg);
 
-          this.log(LOG_DEBUG, "Outgoing Janus message", msg);
+          this.log.debug("Outgoing Janus message", msg);
 
           return new Promise(function (resolve, reject) {
             var timeout = setTimeout(function () {
               delete _this4.txns[msg.transaction];
-              reject(new Error('Signalling message timed out ' + JSON.stringify(msg)));
+              reject(new Error("Signalling message timed out " + JSON.stringify(msg)));
             }, _this4.options.timeout_ms);
 
             _this4.txns[msg.transaction] = {
@@ -889,19 +874,19 @@ $__System.register('a', ['15'], function (_export, _context) {
          * Call this before unreferencing an instance.
          */
         stop: function stop() {
-          this.log(LOG_DEBUG, 'stop()');
+          this.log.debug("stop()");
           this._stopKeepalive();
         },
         _sendKeepalive: function _sendKeepalive() {
           var _this5 = this;
 
           return this.send({ janus: "keepalive" }).catch(function (err) {
-            _this5.log(LOG_ERR, 'Keepalive timed out');
+            _this5.log.error("Keepalive timed out");
             _this5._emit('keepalive_timout');
           });
         },
         _stopKeepalive: function _stopKeepalive() {
-          this.log(LOG_DEBUG, '_stopKeepalive()');
+          this.log.debug('_stopKeepalive()');
           if (this.keepalive_timeout) {
             clearTimeout(this.keepalive_timeout);
           }

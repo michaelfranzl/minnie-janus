@@ -35,12 +35,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import EventEmitter from '@michaelfranzl/captain-hook';
 
 
-var LOG_WARN = -1;
-var LOG_ERR = -2;
-var LOG_INFO = 0;
-var LOG_DEBUG = 1;
-
-
 var properties = {
   session: null,  // an instance of a Session (see `session.js`)
   id: null,       // on the server, this is called the 'handle'
@@ -54,15 +48,6 @@ var properties = {
 
 var methods = {
   /**
-   * Plugin-specific log method.
-   * 
-   * Creates scoped logging events for whoever is subscribed.
-   */
-  log(level, ...args) {
-    this._emit('log', level, `plugin_${this.label}(${this.id})`, ...args);
-  },
-  
-  /**
    * Attach the server-side plugin (by `this.name`) to the session.
    * 
    * The internal method `this._onAttached()` will be called.
@@ -74,7 +59,7 @@ var methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response takes too long. Resolved otherwise.
    */
   attach(session) {
-    this.log(LOG_DEBUG, "attach()");
+    this.log.debug("attach()");
     
     this.session = session;
     
@@ -98,7 +83,7 @@ var methods = {
    * behavior.
    */
   _onAttached() {
-    this.log(LOG_WARN, "_onAttached(): Handling of this event is plugin-specific. You can override the _onAttached() method with plugins-specific behavior.");
+    this.log.warn("_onAttached(): Handling of this event is plugin-specific. You can override the _onAttached() method with plugins-specific behavior.");
   },
   
   /**
@@ -106,7 +91,7 @@ var methods = {
    * behavior.
    */
   _onDetached() {
-    this.log(LOG_WARN, "_onDetached(): Handling of this event is plugin-specific. You can override the _onDetached() method with plugins-specific behavior.");
+    this.log.warn("_onDetached(): Handling of this event is plugin-specific. You can override the _onDetached() method with plugins-specific behavior.");
   },
   
   /**
@@ -121,7 +106,7 @@ var methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response takes too long. Resolved otherwise.
    */
   detach() {
-    this.log(LOG_DEBUG, "detach()");
+    this.log.debug("detach()");
     return this.send({
       janus: "detach"
     })
@@ -147,7 +132,7 @@ var methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response takes too long. Resolved otherwise.
    **/
   send(obj) {
-    this.log(LOG_DEBUG, "send()");
+    this.log.debug("send()");
     return this.session.send(Object.assign({ handle_id: this.id }, obj));
   },
   
@@ -175,7 +160,7 @@ var methods = {
     if (jsep) {
       msg.jsep = jsep; // 'jsep' recognized key by Janus. 4th arg in .handle_message().
     }
-    this.log(LOG_DEBUG, "sendMessage()");
+    this.log.debug("sendMessage()");
     return this.send(msg);
   },
 
@@ -187,7 +172,7 @@ var methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response takes too long. Resolved otherwise.
    */
   sendTrickle(candidate) {
-    this.log(LOG_DEBUG, "sendTrickle()");
+    this.log.debug("sendTrickle()");
     return this.send({ janus: "trickle",  candidate });
   },
   
@@ -197,7 +182,7 @@ var methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response takes too long. Resolved otherwise.
    */
   hangup() {
-    this.log(LOG_DEBUG, "hangup()");
+    this.log.debug("hangup()");
     return this.send({ janus: "hangup" });
   },
   
@@ -216,11 +201,11 @@ var methods = {
    */
   receive(msg) {
     if (msg.sender.toString() != this.id) {
-      log(LOG_WARN, "Received message, but it is not for this plugin instance. This is probably the mistake of the parent application using this plugin");
+      this.log(LOG_WARN, "Received message, but it is not for this plugin instance. This is probably the mistake of the parent application using this plugin");
       return;
     }
     
-    this.log(LOG_WARN, "Received message, but handling it is plugin-specific. You should override the receive(msg) method.");
+    this.log.warn("Received message, but handling it is plugin-specific. You should override the receive(msg) method.");
   },
 };
 
@@ -230,7 +215,12 @@ var methods = {
   * 
   * We only keep track of uptime.
   */
-function init(opts) {
+function init({
+  log = console
+} = {}) {
+  
+  this.log = log;
+  
   this.interval_secondly = setInterval(() => {
     // run every second
     this.uptime++;

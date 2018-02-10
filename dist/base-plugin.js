@@ -459,15 +459,21 @@ $__System.registerDynamic('15', ['d', '13', '10', 'c', 'f', '12', '11'], true, f
 $__System.register('a', ['15'], function (_export, _context) {
   "use strict";
 
-  var stampit, _defineProperty, CaptainHook$1, LOG_WARN, LOG_DEBUG, properties, methods, base_plugin, basePluginStamp;
+  var stampit, _defineProperty, CaptainHook$1, properties, methods, base_plugin, basePluginStamp;
 
   /**
    * Constructor/initializer for this plugin.
    * 
    * We only keep track of uptime.
    */
-  function init(opts) {
+  function init() {
     var _this3 = this;
+
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        _ref$log = _ref.log,
+        log = _ref$log === undefined ? console : _ref$log;
+
+    this.log = log;
 
     this.interval_secondly = setInterval(function () {
       // run every second
@@ -667,8 +673,6 @@ $__System.register('a', ['15'], function (_export, _context) {
         }), _ref2; // return
       };
 
-      LOG_WARN = -1;
-      LOG_DEBUG = 1;
       properties = {
         session: null, // an instance of a Session (see `session.js`)
         id: null, // on the server, this is called the 'handle'
@@ -679,19 +683,6 @@ $__System.register('a', ['15'], function (_export, _context) {
         interval_secondly: null
       };
       methods = {
-        /**
-         * Plugin-specific log method.
-         * 
-         * Creates scoped logging events for whoever is subscribed.
-         */
-        log: function log(level) {
-          for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-            args[_key - 1] = arguments[_key];
-          }
-
-          this._emit.apply(this, ['log', level, 'plugin_' + this.label + '(' + this.id + ')'].concat(args));
-        },
-
         /**
          * Attach the server-side plugin (by `this.name`) to the session.
          * 
@@ -706,7 +697,7 @@ $__System.register('a', ['15'], function (_export, _context) {
         attach: function attach(session) {
           var _this = this;
 
-          this.log(LOG_DEBUG, "attach()");
+          this.log.debug("attach()");
 
           this.session = session;
 
@@ -729,7 +720,7 @@ $__System.register('a', ['15'], function (_export, _context) {
          * behavior.
          */
         _onAttached: function _onAttached() {
-          this.log(LOG_WARN, "_onAttached(): Handling of this event is plugin-specific. You can override the _onAttached() method with plugins-specific behavior.");
+          this.log.warn("_onAttached(): Handling of this event is plugin-specific. You can override the _onAttached() method with plugins-specific behavior.");
         },
 
         /**
@@ -737,7 +728,7 @@ $__System.register('a', ['15'], function (_export, _context) {
          * behavior.
          */
         _onDetached: function _onDetached() {
-          this.log(LOG_WARN, "_onDetached(): Handling of this event is plugin-specific. You can override the _onDetached() method with plugins-specific behavior.");
+          this.log.warn("_onDetached(): Handling of this event is plugin-specific. You can override the _onDetached() method with plugins-specific behavior.");
         },
 
         /**
@@ -754,7 +745,7 @@ $__System.register('a', ['15'], function (_export, _context) {
         detach: function detach() {
           var _this2 = this;
 
-          this.log(LOG_DEBUG, "detach()");
+          this.log.debug("detach()");
           return this.send({
             janus: "detach"
           }).then(function () {
@@ -779,7 +770,7 @@ $__System.register('a', ['15'], function (_export, _context) {
          * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response takes too long. Resolved otherwise.
          **/
         send: function send(obj) {
-          this.log(LOG_DEBUG, "send()");
+          this.log.debug("send()");
           return this.session.send(Object.assign({ handle_id: this.id }, obj));
         },
 
@@ -808,7 +799,7 @@ $__System.register('a', ['15'], function (_export, _context) {
           if (jsep) {
             msg.jsep = jsep; // 'jsep' recognized key by Janus. 4th arg in .handle_message().
           }
-          this.log(LOG_DEBUG, "sendMessage()");
+          this.log.debug("sendMessage()");
           return this.send(msg);
         },
 
@@ -820,7 +811,7 @@ $__System.register('a', ['15'], function (_export, _context) {
          * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response takes too long. Resolved otherwise.
          */
         sendTrickle: function sendTrickle(candidate) {
-          this.log(LOG_DEBUG, "sendTrickle()");
+          this.log.debug("sendTrickle()");
           return this.send({ janus: "trickle", candidate: candidate });
         },
 
@@ -830,7 +821,7 @@ $__System.register('a', ['15'], function (_export, _context) {
          * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response takes too long. Resolved otherwise.
          */
         hangup: function hangup() {
-          this.log(LOG_DEBUG, "hangup()");
+          this.log.debug("hangup()");
           return this.send({ janus: "hangup" });
         },
 
@@ -849,11 +840,11 @@ $__System.register('a', ['15'], function (_export, _context) {
          */
         receive: function receive(msg) {
           if (msg.sender.toString() != this.id) {
-            log(LOG_WARN, "Received message, but it is not for this plugin instance. This is probably the mistake of the parent application using this plugin");
+            this.log(LOG_WARN, "Received message, but it is not for this plugin instance. This is probably the mistake of the parent application using this plugin");
             return;
           }
 
-          this.log(LOG_WARN, "Received message, but handling it is plugin-specific. You should override the receive(msg) method.");
+          this.log.warn("Received message, but handling it is plugin-specific. You should override the receive(msg) method.");
         }
       };
       Object.assign(methods, CaptainHook$1());
