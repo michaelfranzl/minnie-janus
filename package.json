@@ -7,6 +7,16 @@
   },
   "author": "Michael Karl Franzl",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaelfranzl/minnie-janus.git"
+  },
+  "keywords": [
+    "javascript",
+    "janus-gateway",
+    "webrtc",
+    "stampit"
+  ],
   "dependencies": {
     "@michaelfranzl/captain-hook": "^1.0.2",
     "@stamp/it": "^1.0.1"
@@ -22,6 +32,7 @@
     "dependencies": {
       "@michaelfranzl/captain-hook": "npm:@michaelfranzl/captain-hook@^1.0.2",
       "@stamp/it": "npm:@stamp/it@^1.0.1",
+      "loglevel": "npm:loglevel@^1.6.1",
       "webrtc-adapter": "npm:webrtc-adapter@^6.0.3"
     },
     "devDependencies": {

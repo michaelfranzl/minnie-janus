@@ -18,40 +18,19 @@ import Session from '../src/session-stamp.js';
 
 import EchotestPlugin from './echotest-plugin.js'; // extends base-plugin.js
 
+import loglevel from 'loglevel';
 
-var LOG_WARN = -1;
-var LOG_ERR = -2;
-var LOG_INFO = 0;
-var LOG_DEBUG = 1;
-function log(level, ...args) {
-  var levels = {
-    '-1': ["LOG_WARN  "],
-    '-2': ["LOG_ERR   "],
-    '0':  ["LOG_INFO  "],
-    '1':  ["LOG_DEBUG "],
-  };
-  
-  if (level > 1) { return; } // Adjust logging depth
-
-  let loglevel = levels[level.toString()][0];
-  if (loglevel == 'LOG_ERR') {
-    console.error(`[${loglevel}]`, ...args);
-  } else if (loglevel == 'LOG_WARN') {
-    console.warn(`[${loglevel}]`, ...args);
-  } else {
-    console.log(`[${loglevel}]`, ...args);
-  }
-}
-
-
+loglevel.enableAll();
 
 // instantiate one session
-let session = Session();
+let session = Session({
+  log: loglevel,
+});
 window.session = session; // for direct access in console
 
 // We choose WebSockets as transport.
 //let ws = new WebSocket("ws://127.0.0.1:8188", "janus-protocol"); // The browser may block unencrypted Websocket connections when the page is served via HTTPS.
-let ws = new WebSocket("wss://localhost:8989", "janus-protocol");
+let ws = new WebSocket("wss://127.0.0.1:8989", "janus-protocol");
 
 // Outoing communications to janus-gateway.
 session.on('output', msg => ws.send(JSON.stringify(msg)));
@@ -61,16 +40,11 @@ ws.addEventListener("message", event => {
   session.receive(JSON.parse(event.data));
 });
 
-// Forward log event
-session.on('log', (level, session_info, ...args) => {
-  log(level, session_info, ...args);
-});
-
 // Create a session server-side once WebSocket is connected.
 ws.addEventListener("open", () => {
   session.create()
   .then(() => {
-    log(LOG_INFO, `Session with ID ${session.id} created.`);
+    console.log(`Session with ID ${session.id} created.`);
     
     // Attach the echotest plugin to this session
     let echotest_plugin = EchotestPlugin();
@@ -82,6 +56,6 @@ ws.addEventListener("open", () => {
 });
 
 ws.addEventListener("close", event => {
-  log(LOG_INFO, "janus-gateway went away");
+  console.warn("janus-gateway went away");
   session.stop(); // No point in continuing sending keepalives if the server is down.
 });

@@ -34,6 +34,7 @@ SystemJS.config({
     "@stamp/it": "npm:@stamp/it@1.0.1",
     "assert": "npm:jspm-nodelibs-assert@0.2.1",
     "fs": "npm:jspm-nodelibs-fs@0.2.1",
+    "loglevel": "npm:loglevel@1.6.1",
     "os": "npm:jspm-nodelibs-os@0.2.2",
     "process": "npm:jspm-nodelibs-process@0.2.1",
     "webrtc-adapter": "npm:webrtc-adapter@6.0.3"

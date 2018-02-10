@@ -201,7 +201,7 @@ var methods = {
    */
   receive(msg) {
     if (msg.sender.toString() != this.id) {
-      this.log(LOG_WARN, "Received message, but it is not for this plugin instance. This is probably the mistake of the parent application using this plugin");
+      this.log.warn("Received message, but it is not for this plugin instance. This is probably the mistake of the parent application using this plugin");
       return;
     }
     
@@ -216,7 +216,12 @@ var methods = {
   * We only keep track of uptime.
   */
 function init({
-  log = console
+  log = {
+    info: console.info,
+    warn: console.warn,
+    debug: console.debug || console.log,
+    error: console.error
+  }
 } = {}) {
   
   this.log = log;

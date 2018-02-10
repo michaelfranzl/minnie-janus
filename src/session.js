@@ -96,8 +96,6 @@ var methods = {
   attachPlugin(plugin) {
     this.log.debug(`Attaching plugin ${plugin.name}`);
     
-    plugin.on('log', (...args) => this.log(...args));
-    
     plugin.on('detached', response => {
       this.log.debug(`Plugin ${plugin.name} detached. Removing reference ${plugin.id} from ${Object.keys(this.plugins)}.`);
       delete this.plugins[plugin.id];
@@ -247,7 +245,12 @@ Object.assign(methods, EventEmitter());
 function init({
   timeout_ms = 5000,
   keepalive_ms = 50000,
-  log = console
+  log = {
+    info: console.info,
+    warn: console.warn,
+    debug: console.debug || console.log,
+    error: console.error
+  }
 } = {}) {
   this.log = log;
   this.options.timeout_ms = timeout_ms;

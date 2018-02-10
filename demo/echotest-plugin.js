@@ -12,10 +12,6 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-var LOG_WARN = -1;
-var LOG_ERR = -2;
-var LOG_INFO = 0;
-var LOG_DEBUG = 1;
 
 let properties = {
   // `name` must match the plugin name string in the C source code
@@ -38,7 +34,7 @@ let methods = {
         this.sendTrickle(event.candidate || null)
         .then(() => {
           if (!event.candidate) {
-            this.log(LOG_INFO, 'ICE negotiated');
+            this.log.info('ICE negotiated');
             resolve();
           }
         });
@@ -86,19 +82,19 @@ let methods = {
     // 'detached' event
     if (msg.janus == 'detached') {
       this.attached = false;
-      this.log(LOG_INFO, "now detached");
+      this.log.info("now detached");
       //this._emit('detached'); // inform the parent app if useful
       return;
     }
     
     // If we receive jsep, this is an SDP answer
     if (msg.jsep) {
-      this.log(LOG_DEBUG, 'received SDP answer');
+      this.log.debug('received SDP answer');
       this.rtcconn.setRemoteDescription(msg.jsep);
       return;
     }
     
-    this.log(LOG_INFO, 'received message but not yet implemented', msg);
+    this.log.info('received message but not yet implemented', msg);
   },
   
   /**
@@ -115,13 +111,13 @@ let methods = {
    * 5. Play the video via the `onaddstream` event of RTCPeerConnection
    */
   _onAttached() {
-    this.log(LOG_INFO, 'Asking user to share media...');
+    this.log.info('Asking user to share media...');
     navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true
     })
     .then(localmedia => {
-      this.log(LOG_INFO, 'User shared local media. Creating offer...');
+      this.log.info('User shared local media. Creating offer...');
       this.rtcconn.addStream(localmedia);
       this.vid_local.srcObject = localmedia;
       this.vid_local.play();
@@ -131,7 +127,7 @@ let methods = {
       }); // promise returning jsep_offer
     })
     .then(jsep_offer => {
-      this.log(LOG_INFO, 'SDP offer created. Setting it on rtcconn and submitting it to the server...');
+      this.log.info('SDP offer created. Setting it on rtcconn and submitting it to the server...');
       this.rtcconn.setLocalDescription(jsep_offer);
       this.sendMessage(null, jsep_offer);
     });
@@ -149,7 +145,7 @@ function init(opts) {
   this.rtcconn = new RTCPeerConnection();
   
   this.rtcconn.onaddstream = event => {
-    this.log(LOG_INFO, "RTCPeerConnection got remote media stream. Playing.");
+    this.log.info("RTCPeerConnection got remote media stream. Playing.");
     this.vid_remote.srcObject = event.stream;
     this.vid_remote.play();
   };
