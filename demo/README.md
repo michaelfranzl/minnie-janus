@@ -31,14 +31,29 @@ This demo application (see `/demo/index.js`) will create one Session instance (f
 
 ## How to run this demo
 
-First make sure that the echotest demo (browser app) shipped with janus-gateway works.
+Preconditions:
 
-`index.html` is a [jspm](https://jspm.io/) application. **In the parent directory**, run `npm install` to install jspm, then run `jspm install` to install all dependencies, then serve the demo and open it in a browser tab with the following command:
+1. The echotest demo (browser app) shipped with janus-gateway works.
+2. janus-gateway listens at `localhost` or somewhere in your LAN with all open UDP ports so that
+   there is no need for STUN/TURN servers.
+3. The websocket server of janus-gateway listens at ws://localhost:8188
+2. Your browser supports ES modules and Import Maps. At the time of writing, only Chrome version 74
+   has experimental support for Import Maps. Enable "Experimental Web Platform features" in `chrome://flags`.
 
-    live-server --https=/path/to/your/live-server-conig-file.js --open=demo/index.html
-    
-Prerequisites:
+In the root directory of `minnie-janus`:
 
-1. Refer to the [live-server documentation](https://www.npmjs.com/package/live-server) to set up a HTTPS connection. WebRTC requires that the web page is secured via valid SSL.
-2. A running `janus-gateway` with secure WebSockets (wss) configured. Configure `janus-gateway` with valid SSL certs for the wss connection. Refer to the janus-gateway documentation. This demo application will connect to `wss://localhost:8989` (see `/demo/index.js`).
-3. The echotest plugin must be installed for janus-gateway.
+    npm install
+    npm install -g jspm@2.0.0-beta.7
+    jspm install
+    npm install -g http-server
+    http-server
+
+`http-server` will output a URL, open it in your browser, e.g. `http://localhost:8080/demo/`. Give
+acces to your audio/video media. Open DevTools to inspect the console for problems. If everything works,
+you should see a local raw video and a remote echo of the video stream.
+
+## Development
+
+`importmap.json` was generated with:
+
+    jspm map ./demo/index.js -o demo/importmap.json --flat-scope --map-base .

@@ -172,7 +172,7 @@ import BasePlugin from '../src/base-plugin-stamp.js';
 let factory = BasePlugin.compose({
   methods,
   properties,
-  init,
+  initializers: [init],
 });
 export default factory;
 

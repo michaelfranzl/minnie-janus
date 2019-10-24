@@ -29,8 +29,8 @@ let session = Session({
 window.session = session; // for direct access in console
 
 // We choose WebSockets as transport.
-//let ws = new WebSocket("ws://127.0.0.1:8188", "janus-protocol"); // The browser may block unencrypted Websocket connections when the page is served via HTTPS.
-let ws = new WebSocket("wss://127.0.0.1:8989", "janus-protocol");
+let ws = new WebSocket("ws://localhost:8188", "janus-protocol"); // The browser may block unencrypted Websocket connections when the page is served via HTTPS.
+//let ws = new WebSocket("wss://localhost:8989", "janus-protocol");
 
 // Outoing communications to janus-gateway.
 session.on('output', msg => ws.send(JSON.stringify(msg)));
