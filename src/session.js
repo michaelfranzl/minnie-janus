@@ -137,8 +137,11 @@ var methods = {
       let txn = this.txns[msg.transaction]; // Get the original transaction
       
       if (txn) {
-        // This is the first response to a transaction we have previously sent.
-        // This is always a synchronous response.
+        // If the original outgoing message was a jsep, do not resolve the promise with this ack,
+        // but with the jsep answer coming later. janus-gateway is not very consistent in what it
+        // sends: See janus.c
+        if (msg.janus == 'ack' && txn.msg.jsep) return;
+
         // Resolve or reject the Promise, then forget the transaction.
         clearTimeout(txn.timeout);
         delete this.txns[msg.transaction];
@@ -159,9 +162,12 @@ var methods = {
       // let eventname = msg.janus; // 'event|webrtcup|hangup|detached|media|slowlink'
       let plugin_id = msg.sender.toString();
       let plugin = this.plugins[plugin_id];
+      if (!plugin) {
+        this.log.error(`Could not find plugin that sent this transaction.`);
+        return;
+      }
+
       plugin.receive(msg);
-    } else {
-      this.log.error(`Could not find plugin that sent this transaction.`);
     }
   },
   

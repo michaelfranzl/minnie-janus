@@ -87,13 +87,6 @@ let methods = {
       return;
     }
     
-    // If we receive jsep, this is an SDP answer
-    if (msg.jsep) {
-      this.log.debug('received SDP answer');
-      this.rtcconn.setRemoteDescription(msg.jsep);
-      return;
-    }
-    
     this.log.info('received message but not yet implemented', msg);
   },
   
@@ -129,7 +122,11 @@ let methods = {
     .then(jsep_offer => {
       this.log.info('SDP offer created. Setting it on rtcconn and submitting it to the server...');
       this.rtcconn.setLocalDescription(jsep_offer);
-      this.sendMessage(null, jsep_offer);
+      this.sendMessage(null, jsep_offer)
+        .then(({jsep: jsep_answer}) => {
+          this.log.debug('received SDP answer');
+          this.rtcconn.setRemoteDescription(jsep_answer);
+        });
     });
     
     // Negotiate ICE in parallel
