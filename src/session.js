@@ -135,9 +135,7 @@ const methods = {
     this.log.debug('Receiving message from Janus', msg);
 
     if (msg.session_id && msg.session_id !== this.id) {
-      // This should never happen when parent app does its job properly.
-      this.log.warn('Message not for this session instance', msg);
-      return;
+      throw new Error('Got passed a message which is not for this session.');
     }
 
     if (msg.transaction) {
