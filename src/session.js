@@ -78,8 +78,10 @@ const methods = {
     });
 
     await Promise.all(pluginDetachPromises);
-    await this.send({ janus: 'destroy' });
-    this.stopKeepalive();
+    setTimeout(async () => {
+      await this.send({ janus: 'destroy' });
+      this.stopKeepalive();
+    }, 1000);
   },
 
   /**
@@ -98,7 +100,8 @@ const methods = {
     plugin.on('detached', () => {
       this.log.debug(`Plugin ${plugin.name} detached. \
       Removing reference ${plugin.id} from ${Object.keys(this.plugins)}.`);
-      delete this.plugins[plugin.id];
+      // Plugins may still send a message before they are really detached from the server.
+      setTimeout(() => delete this.plugins[plugin.id], 1000);
     });
 
     const response = await plugin.attach(this);
