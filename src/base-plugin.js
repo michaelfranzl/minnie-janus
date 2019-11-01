@@ -168,6 +168,20 @@ const methods = {
   },
 
   /**
+   * Alias for `sendMessage({}, jsep)`
+   *
+   * @param {Object} jsep - Should be JSON-serializable. Will be provided to the
+   * `.handle_message` C function as `json_t *jsep`.
+   *
+   * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
+   * takes too long. Resolved otherwise.
+   */
+  sendJsep(jsep) {
+    this.log.debug('sendJsep()');
+    return this.sendMessage({}, jsep);
+  },
+
+  /**
    * Send trickle ICE candidates to the janus core, related to this plugin.
    *
    * @param {[Object|Array|null]} candidate - Should be JSON-serializable.

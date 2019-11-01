@@ -131,7 +131,7 @@ const methods = {
       .then((jsepOffer) => {
         this.log.info('SDP offer created. Setting it on rtcconn and submitting it to the server...');
         this.rtcconn.setLocalDescription(jsepOffer);
-        this.sendMessage(null, jsepOffer)
+        this.sendJsep(jsepOffer)
           .then(({ jsep: jsepAnswer }) => {
             this.log.debug('received SDP answer');
             this.rtcconn.setRemoteDescription(jsepAnswer);
