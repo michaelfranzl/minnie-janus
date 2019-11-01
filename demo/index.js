@@ -38,23 +38,30 @@ const ws = new WebSocket('ws://localhost:8188', 'janus-protocol');
 session.on('output', (msg) => ws.send(JSON.stringify(msg)));
 
 // Incoming communications from janus-gateway.
-ws.addEventListener('message', (event) => {
-  session.receive(JSON.parse(event.data));
-});
+ws.addEventListener('message', (event) => session.receive(JSON.parse(event.data)));
 
 // Create a session server-side once WebSocket is connected.
-ws.addEventListener('open', () => {
-  session.create()
-    .then(() => {
-      console.log(`Session with ID ${session.id} created.`);
+ws.addEventListener('open', async () => {
+  try {
+    await session.create();
+    console.log(`Session with ID ${session.id} created.`);
 
-      // Attach the echotest plugin to this session
-      const echotestPlugin = EchotestPlugin();
-      window.echotest_plugin = echotestPlugin; // for direct access in console
+  } catch(err) {
+    console.log('Error during creation of session', err);
+    return;
+  }
 
-      session.attachPlugin(echotestPlugin)
-        .then(() => console.log(`Echotest plugin attached with handle/ID ${echotestPlugin.id}`));
-    });
+  const echotestPlugin = EchotestPlugin();
+  window.echotest_plugin = echotestPlugin; // for direct access in console
+
+  try {
+    await session.attachPlugin(echotestPlugin);
+    console.log(`Echotest plugin attached with handle/ID ${echotestPlugin.id}`);
+
+  } catch(err) {
+    console.log('Error during attaching of plugin', err);
+    return;
+  }
 });
 
 ws.addEventListener('close', () => {

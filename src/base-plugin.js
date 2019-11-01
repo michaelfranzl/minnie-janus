@@ -65,7 +65,7 @@ const methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
    * takes too long. Resolved otherwise.
    */
-  attach(session) {
+  async attach(session) {
     this.log.debug('attach()');
 
     this.session = session;
@@ -75,14 +75,14 @@ const methods = {
       plugin: this.name,
     };
 
-    return this.session.send(msg)
-      .then((response) => {
-        this.id = response.data.id;
-        this.attached = true;
-        this.onAttached();
-        this.emit('attached');
-        return response;
-      });
+    const response = await this.session.send(msg);
+
+    this.id = response.data.id;
+    this.attached = true;
+    this.onAttached();
+    this.emit('attached');
+
+    return response;
   },
 
   /**
@@ -111,17 +111,14 @@ const methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
    * takes too long. Resolved otherwise.
    */
-  detach() {
+  async detach() {
     this.log.debug('detach()');
-    return this.send({
-      janus: 'detach',
-    })
-      .then(() => {
-        this.attached = false;
-        this.onDetached();
-        this.emit('detached');
-        clearInterval(this.interval_secondly);
-      });
+    await this.send({ janus: 'detach' });
+
+    this.attached = false;
+    this.onDetached();
+    this.emit('detached');
+    clearInterval(this.interval_secondly);
   },
 
   /**
@@ -138,7 +135,7 @@ const methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
    * takes too long. Resolved otherwise.
    */
-  send(obj) {
+  async send(obj) {
     this.log.debug('send()');
     return this.session.send({ ...obj, handle_id: this.id });
   },
@@ -157,7 +154,7 @@ const methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
    * takes too long. Resolved otherwise.
    */
-  sendMessage(body = {}, jsep = null) {
+  async sendMessage(body = {}, jsep) {
     const msg = {
       janus: 'message',
       body, // required. 3rd argument in the server-side .handle_message() function
@@ -176,7 +173,7 @@ const methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
    * takes too long. Resolved otherwise.
    */
-  sendJsep(jsep) {
+  async sendJsep(jsep) {
     this.log.debug('sendJsep()');
     return this.sendMessage({}, jsep);
   },
@@ -189,7 +186,7 @@ const methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
    * takes too long. Resolved otherwise.
    */
-  sendTrickle(candidate) {
+  async sendTrickle(candidate) {
     this.log.debug('sendTrickle()');
     return this.send({ janus: 'trickle', candidate });
   },
@@ -200,7 +197,7 @@ const methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
    * takes too long. Resolved otherwise.
    */
-  hangup() {
+  async hangup() {
     this.log.debug('hangup()');
     return this.send({ janus: 'hangup' });
   },
@@ -219,7 +216,7 @@ const methods = {
    * @abstract
    * @param {Object} msg - Object parsed from server-side JSON
    */
-  receive(msg) {
+  async receive(msg) {
     if (msg.sender.toString() !== this.id) {
       this.log.warn('Received message, but it is not for this plugin instance. This is probably'
         + ' the mistake of the parent application using this plugin');

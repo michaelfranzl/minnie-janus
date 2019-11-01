@@ -58,16 +58,10 @@ const methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
    * takes too long. Resolved otherwise.
    */
-  create() {
-    return this.send({ janus: 'create' })
-      .then((response) => {
-        this.id = response.data.id;
-        return response;
-      })
-      .catch((err) => {
-        this.log.error(`Exception during creating session ${this.id}`, err);
-        throw err;
-      });
+  async create() {
+    const response = await this.send({ janus: 'create' });
+    this.id = response.data.id;
+    return response;
   },
 
   /**
@@ -76,20 +70,16 @@ const methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
    * takes too long. Resolved otherwise.
    */
-  destroy() {
+  async destroy() {
     const pluginDetachPromises = Object.keys(this.plugins).map((id) => {
       const plugin = this.plugins[id];
       this.log.debug('Detaching plugin before destroying session', plugin.name);
       return plugin.detach();
     });
 
-    return Promise.all(pluginDetachPromises)
-      .then(() => this.send({ janus: 'destroy' }))
-      .then(() => this.stopKeepalive())
-      .catch((err) => {
-        this.log.error('Exception during destroying session', err);
-        throw err; // re-throw
-      });
+    await Promise.all(pluginDetachPromises);
+    await this.send({ janus: 'destroy' });
+    this.stopKeepalive();
   },
 
   /**
@@ -102,7 +92,7 @@ const methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
    * takes too long. Resolved otherwise.
    */
-  attachPlugin(plugin) {
+  async attachPlugin(plugin) {
     this.log.debug(`Attaching plugin ${plugin.name}`);
 
     plugin.on('detached', () => {
@@ -111,16 +101,11 @@ const methods = {
       delete this.plugins[plugin.id];
     });
 
-    return plugin.attach(this)
-      .then((response) => {
-        this.log.info(`Plugin ${plugin.name} attached.`);
-        this.plugins[response.data.id] = plugin;
-        this.emit('plugin_attached', response);
-      })
-      .catch((err) => {
-        this.log.error(`Exception during attaching ${plugin.name}`, err);
-        throw err;
-      });
+    const response = await plugin.attach(this);
+
+    this.log.info(`Plugin ${plugin.name} attached.`);
+    this.plugins[response.data.id] = plugin;
+    this.emit('plugin_attached', response);
   },
 
   /**
@@ -195,13 +180,13 @@ const methods = {
    * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
    * takes too long. Resolved otherwise.
    */
-  send(msg) {
+  async send(msg) {
     this.next_tx_id += 1;
     const transaction = this.next_tx_id.toString();
     const payload = { ...msg, transaction };
     if (this.id) payload.session_id = this.id;
 
-    return new Promise((resolve, reject) => {
+    const response_promise = new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         delete this.txns[payload.transaction];
         reject(new Error(`Signalling message timed out ${JSON.stringify(payload)}`));
@@ -210,10 +195,13 @@ const methods = {
       this.txns[transaction] = {
         resolve, reject, timeout, payload,
       };
-      this.log.debug('Outgoing Janus message', payload);
-      this.emit('output', payload);
-      this.resetKeepalive();
     });
+
+    this.log.debug('Outgoing Janus message', payload);
+    this.emit('output', payload);
+    this.resetKeepalive();
+
+    return response_promise;
   },
 
   /**
@@ -227,11 +215,13 @@ const methods = {
   },
 
   sendKeepalive() {
-    return this.send({ janus: 'keepalive' })
-      .catch(() => {
-        this.log.error('Keepalive timed out');
-        this.emit('keepalive_timout');
-      });
+    try {
+      this.send({ janus: 'keepalive' });
+
+    } catch(err) {
+      this.log.error('Keepalive timed out');
+      this.emit('keepalive_timout');
+    }
   },
 
   stopKeepalive() {
