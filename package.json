@@ -22,7 +22,10 @@
     "webrtc-adapter": "^7.3.0"
   },
   "devDependencies": {
-    "@jspm/core": "^1.0.4"
+    "@jspm/core": "^1.0.4",
+    "eslint": "^6.5.1",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2"
   },
   "type": "module"
 }
