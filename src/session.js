@@ -140,7 +140,7 @@ const methods = {
         clearTimeout(txn.timeout);
         delete this.txns[msg.transaction];
         if (msg.janus === 'error') {
-          this.log.error(`Got error ${msg.error.code} from Janus. \
+          this.log.debug(`Got error ${msg.error.code} from Janus. \
           Will reject promise.`, msg.error.reason);
         }
         (msg.janus === 'error' ? txn.reject : txn.resolve)(msg);
