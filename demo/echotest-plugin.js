@@ -36,16 +36,14 @@ const properties = {
 * Methods to add to or overwrite in BasePlugin
 */
 const methods = {
-  negotiateIce() {
+  async negotiateIce() {
     return new Promise((resolve) => {
-      this.rtcconn.onicecandidate = (event) => {
-        this.sendTrickle(event.candidate || null)
-          .then(() => {
-            if (!event.candidate) {
-              this.log.info('ICE negotiated');
-              resolve();
-            }
-          });
+      this.rtcconn.onicecandidate = async (event) => {
+        await this.sendTrickle(event.candidate || null);
+        if (!event.candidate) {
+          this.log.info('Janus received last ICE candidate.');
+          resolve();
+        }
       };
     });
   },
@@ -55,7 +53,7 @@ const methods = {
    *
    * @param {bool} enabled
    */
-  setVideo(enabled) {
+  async setVideo(enabled) {
     this.sendMessage({ video: enabled });
   },
 
@@ -64,7 +62,7 @@ const methods = {
    *
    * @param {bool} enabled
    */
-  setAudio(enabled) {
+  async setAudio(enabled) {
     this.sendMessage({ audio: enabled });
   },
 
@@ -73,7 +71,7 @@ const methods = {
    *
    * @param {integer} bitrate
    */
-  setBitrate(bitrate) {
+  async setBitrate(bitrate) {
     this.sendMessage({ bitrate });
   },
 
@@ -87,7 +85,6 @@ const methods = {
    * @param {Object} msg - The parsed JSON from the server
    */
   receive(msg) {
-    // 'detached' event
     if (msg.janus === 'detached') {
       this.attached = false;
       this.log.info('now detached');
@@ -111,35 +108,31 @@ const methods = {
    * 4. negotiate ICE (can be in parallel to the SDP exchange)
    * 5. Play the video via the `onaddstream` event of RTCPeerConnection
    */
-  onAttached() {
+  async onAttached() {
+    this.negotiateIce(); // negotiate ICE in parallel. Promise resolves when ICE is negotiated.
+
     this.log.info('Asking user to share media...');
 
-    navigator.mediaDevices.getUserMedia({
+    const localmedia = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,
-    })
-      .then((localmedia) => {
-        this.log.info('User shared local media. Creating offer...');
-        this.rtcconn.addStream(localmedia);
-        this.vid_local.srcObject = localmedia;
-        this.vid_local.play();
-        return this.rtcconn.createOffer({
-          audio: true,
-          video: true,
-        }); // promise returning jsep_offer
-      })
-      .then((jsepOffer) => {
-        this.log.info('SDP offer created. Setting it on rtcconn and submitting it to the server...');
-        this.rtcconn.setLocalDescription(jsepOffer);
-        this.sendJsep(jsepOffer)
-          .then(({ jsep: jsepAnswer }) => {
-            this.log.debug('received SDP answer');
-            this.rtcconn.setRemoteDescription(jsepAnswer);
-          });
-      });
+    });
 
-    // Negotiate ICE in parallel
-    this.negotiateIce(); // returns a Promise
+    this.rtcconn.addStream(localmedia);
+    this.vid_local.srcObject = localmedia;
+    this.vid_local.play();
+
+    this.log.info('User shared local media. Creating offer...');
+    const jsepOffer = await this.rtcconn.createOffer({
+      audio: true,
+      video: true,
+    });
+    this.log.info('SDP offer created. Setting it on rtcconn and submitting it to the server...');
+    this.rtcconn.setLocalDescription(jsepOffer);
+
+    const { jsep: jsepAnswer } = await this.sendJsep(jsepOffer);
+    this.log.debug('received SDP answer');
+    this.rtcconn.setRemoteDescription(jsepAnswer);
   },
 };
 
@@ -168,4 +161,5 @@ const factory = BasePlugin.compose({
   properties,
   initializers: [init],
 });
+
 export default factory;
