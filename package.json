@@ -1,7 +1,7 @@
 {
   "name": "minnie-janus",
-  "version": "0.8.1",
-  "description": "A small, modern, transparent JavaScript interface for the Janus WebRTC gateway API, for browsers as well as Node.js",
+  "version": "0.8.2",
+  "description": "A small, modern, general interface module written in ES8 Javascript for the Janus WebRTC gateway API, for browsers as well as Node.js.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
