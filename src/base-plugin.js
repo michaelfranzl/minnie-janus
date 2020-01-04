@@ -226,10 +226,10 @@ const methods = {
  */
 function init({
   log = {
-    info: console.info,
-    warn: console.warn,
-    debug: console.debug || console.log,
-    error: console.error,
+    info() {},
+    warn() {},
+    debug() {},
+    error() {},
   },
 } = {}) {
   this.log = log;

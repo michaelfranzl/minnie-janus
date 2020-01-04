@@ -1,4 +1,4 @@
-/*jshint esversion: 6 */
+/* eslint-disable import/extensions */
 
 /*
 minnie-janus - Minimal and modern JavaScript interface for the Janus WebRTC gateway
@@ -22,10 +22,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 import stampit from '@stamp/it';
-import base_plugin from './base-plugin.js';
+import basePlugin from './base-plugin.js';
 
 export default stampit({
-  properties: base_plugin.properties,
-  methods: base_plugin.methods,
-  init: base_plugin.init,
+  properties: basePlugin.properties,
+  methods: basePlugin.methods,
+  init: basePlugin.init,
 });

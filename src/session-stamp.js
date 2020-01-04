@@ -1,3 +1,5 @@
+/* eslint-disable import/extensions */
+
 /*
 minnie-janus - Minimal and modern JavaScript interface for the Janus WebRTC gateway
 
@@ -24,4 +26,6 @@ import {
   props, deepProps, methods, init,
 } from './session.js';
 
-export default stampit({ props, deepProps, methods, init });
+export default stampit({
+  props, deepProps, methods, init,
+});

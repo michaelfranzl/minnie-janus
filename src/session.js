@@ -196,7 +196,7 @@ const methods = {
     const payload = { ...msg, transaction };
     if (this.id) payload.session_id = this.id;
 
-    const response_promise = new Promise((resolve, reject) => {
+    const responsePromise = new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         delete this.transactions[payload.transaction];
         reject(new Error(`Signalling message timed out ${JSON.stringify(payload)}`));
@@ -211,7 +211,7 @@ const methods = {
     this.emit('output', payload);
     this.resetKeepalive();
 
-    return response_promise;
+    return responsePromise;
   },
 
   /**
@@ -227,8 +227,7 @@ const methods = {
   sendKeepalive() {
     try {
       this.send({ janus: 'keepalive' });
-
-    } catch(err) {
+    } catch (err) {
       this.log.error('Keepalive timed out');
       this.emit('keepalive_timout');
     }
@@ -252,10 +251,10 @@ function init({
   timeoutMs = 5000,
   keepaliveMs = 50000,
   log = {
-    info: console.info,
-    warn: console.warn,
-    debug: console.debug || console.log,
-    error: console.error,
+    info() {},
+    warn() {},
+    debug() {},
+    error() {},
   },
 } = {}) {
   this.log = log;

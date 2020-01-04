@@ -45,8 +45,7 @@ ws.addEventListener('open', async () => {
   try {
     await session.create();
     console.log(`Session with ID ${session.id} created.`);
-
-  } catch(err) {
+  } catch (err) {
     console.log('Error during creation of session', err);
     return;
   }
@@ -57,10 +56,8 @@ ws.addEventListener('open', async () => {
   try {
     await session.attachPlugin(echotestPlugin);
     console.log(`Echotest plugin attached with handle/ID ${echotestPlugin.id}`);
-
-  } catch(err) {
+  } catch (err) {
     console.log('Error during attaching of plugin', err);
-    return;
   }
 });
 
