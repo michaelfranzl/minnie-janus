@@ -71,17 +71,22 @@ const methods = {
    * takes too long. Resolved otherwise.
    */
   async destroy() {
-    const pluginDetachPromises = Object.keys(this.plugins).map((id) => {
-      const plugin = this.plugins[id];
-      this.log.debug('Detaching plugin before destroying session', plugin.name);
-      return plugin.detach();
+    const pluginDetachPromises = Object.entries(this.plugins).map(([, plugin]) => {
+      this.log.debug('Detaching plugin before destroying session', plugin.instance.name);
+      return plugin.instance.detach();
     });
 
     await Promise.all(pluginDetachPromises);
-    setTimeout(async () => {
-      await this.send({ janus: 'destroy' });
-      this.stopKeepalive();
-    }, 1000);
+    const response = await this.send({ janus: 'destroy' });
+    this.stopKeepalive();
+
+    Object.entries(this.plugins).forEach(([id, plugin]) => {
+      this.log.debug(`Removing reference to plugin ${plugin.instance.name} (${id})`);
+      clearTimeout(plugin.timeout_cleanup);
+      delete this.plugins[id];
+      this.log.debug(`Remaining plugins: ${Object.keys(this.plugins)}`);
+    });
+    return response;
   },
 
   /**
@@ -97,18 +102,21 @@ const methods = {
   async attachPlugin(plugin) {
     this.log.debug(`Attaching plugin ${plugin.name}`);
 
-    plugin.on('detached', () => {
-      this.log.debug(`Plugin ${plugin.name} detached. \
-      Removing reference ${plugin.id} from ${Object.keys(this.plugins)}.`);
-      // Plugins may still send a message before they are really detached from the server.
-      setTimeout(() => delete this.plugins[plugin.id], 1000);
-    });
-
     const response = await plugin.attach(this);
 
+    plugin.once('detached', () => {
+      this.log.debug(`Plugin ${plugin.name} detached.`);
+      this.plugins[plugin.id].timeout_cleanup = setTimeout(() => {
+        this.log.debug(`Removing reference to plugin ${plugin.name} (${plugin.id})`);
+        delete this.plugins[plugin.id];
+        this.log.debug(`Remaining plugins: ${Object.keys(this.plugins)}`);
+      }, 30000);
+    });
+
     this.log.info(`Plugin ${plugin.name} attached.`);
-    this.plugins[response.data.id] = plugin;
+    this.plugins[response.data.id] = { instance: plugin, timeout_cleanup: null };
     this.emit('plugin_attached', response);
+    return response;
   },
 
   /**
@@ -160,12 +168,8 @@ const methods = {
       // let eventname = msg.janus; // 'event|webrtcup|hangup|detached|media|slowlink'
       const pluginId = msg.sender.toString();
       const plugin = this.plugins[pluginId];
-      if (!plugin) {
-        this.log.error(`Could not find plugin that sent this transaction.`);
-        return;
-      }
-
-      plugin.receive(msg);
+      if (!plugin) throw new Error(`Could not find plugin with ID ${pluginId}`);
+      plugin.instance.receive(msg);
     }
   },
 
