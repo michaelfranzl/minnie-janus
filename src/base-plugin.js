@@ -48,8 +48,6 @@ const properties = {
   name: 'unset', // the plugin name string in the C source code
   label: 'unset', // just used for shorter debugging
   attached: false,
-  uptime: 0, // seconds since attached
-  interval_secondly: null,
 };
 
 const methods = {
@@ -118,7 +116,6 @@ const methods = {
     this.attached = false;
     this.onDetached();
     this.emit('detached');
-    clearInterval(this.interval_secondly);
   },
 
   /**
@@ -217,13 +214,7 @@ const methods = {
    * @param {Object} msg - Object parsed from server-side JSON
    */
   async receive(msg) {
-    if (msg.sender.toString() !== this.id) {
-      this.log.warn('Received message, but it is not for this plugin instance. This is probably'
-        + ' the mistake of the parent application using this plugin');
-      return;
-    }
-
-    this.log.warn('Received message, but handling it is plugin-specific. You should override the receive(msg) method.');
+    this.log.debug(`Abstract method 'receive' called with message ${msg}`);
   },
 };
 
@@ -242,10 +233,6 @@ function init({
   },
 } = {}) {
   this.log = log;
-
-  this.interval_secondly = setInterval(() => {
-    this.uptime += 1;
-  }, 1000);
 }
 
 // mix in event emitter behavior
