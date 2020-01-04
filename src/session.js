@@ -39,12 +39,12 @@ import EventEmitter from '@michaelfranzl/captain-hook';
 
 const props = {
   id: null, // server-side session ID
-  next_tx_id: 0, // used to generate unique transaction identifier strings
+  next_transaction_id: 0, // used to generate unique transaction identifier strings
   keepalive_timeout: null,
 };
 
 const deepProps = {
-  txns: {}, // keep track of sent messages, used to resolve/reject Promises
+  transactions: {}, // keep track of sent messages, used to resolve/reject Promises
   options: {}, // see initializer
   plugins: {}, // plugin instances by plugin IDs
 };
@@ -128,22 +128,25 @@ const methods = {
 
     if (msg.transaction) {
       // janus: 'ack|success|error|server_info|event|media|webrtcup|slowlink|hangup'
-      const txn = this.txns[msg.transaction]; // Get the original transaction
+      const transaction = this.transactions[msg.transaction]; // Get the original transaction
 
-      if (txn) {
+      if (transaction) {
         // If the original outgoing message was a jsep, do not resolve the promise with this ack,
-        // but with the jsep answer coming later. janus-gateway is not very consistent in what it
-        // sends: See janus.c
-        if (msg.janus === 'ack' && txn.payload.jsep) return;
+        // but with the jsep answer coming later.
+        if (msg.janus === 'ack' && transaction.payload.jsep) return;
 
         // Resolve or reject the Promise, then forget the transaction.
-        clearTimeout(txn.timeout);
-        delete this.txns[msg.transaction];
+        clearTimeout(transaction.timeout);
+        delete this.transactions[msg.transaction];
+
         if (msg.janus === 'error') {
           this.log.debug(`Got error ${msg.error.code} from Janus. \
           Will reject promise.`, msg.error.reason);
+          transaction.reject(msg.error);
+          return;
         }
-        (msg.janus === 'error' ? txn.reject : txn.resolve)(msg);
+
+        transaction.resolve(msg);
         return;
       }
     }
@@ -184,18 +187,18 @@ const methods = {
    * takes too long. Resolved otherwise.
    */
   async send(msg) {
-    this.next_tx_id += 1;
-    const transaction = this.next_tx_id.toString();
+    this.next_transaction_id += 1;
+    const transaction = this.next_transaction_id.toString();
     const payload = { ...msg, transaction };
     if (this.id) payload.session_id = this.id;
 
     const response_promise = new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        delete this.txns[payload.transaction];
+        delete this.transactions[payload.transaction];
         reject(new Error(`Signalling message timed out ${JSON.stringify(payload)}`));
       }, this.options.timeoutMs);
 
-      this.txns[transaction] = {
+      this.transactions[transaction] = {
         resolve, reject, timeout, payload,
       };
     });
