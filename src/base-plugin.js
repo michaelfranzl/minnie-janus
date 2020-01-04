@@ -87,14 +87,14 @@ const methods = {
    * @abstract
    */
   onAttached() {
-    this.log.warn('onAttached() abstract method called');
+    this.log.debug('onAttached() abstract method called');
   },
 
   /**
    * @abstract
    */
   onDetached() {
-    this.log.warn('onDetached() abstract method called');
+    this.log.debug('onDetached() abstract method called');
   },
 
   /**
