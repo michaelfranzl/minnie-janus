@@ -64,7 +64,7 @@ const methods = {
    * takes too long. Resolved otherwise.
    */
   async attach(session) {
-    this.log.debug('attach()');
+    this.logger.debug('attach()');
 
     this.session = session;
 
@@ -87,14 +87,14 @@ const methods = {
    * @abstract
    */
   onAttached() {
-    this.log.debug('onAttached() abstract method called');
+    this.logger.debug('onAttached() abstract method called');
   },
 
   /**
    * @abstract
    */
   onDetached() {
-    this.log.debug('onDetached() abstract method called');
+    this.logger.debug('onDetached() abstract method called');
   },
 
   /**
@@ -110,7 +110,7 @@ const methods = {
    * takes too long. Resolved otherwise.
    */
   async detach() {
-    this.log.debug('detach()');
+    this.logger.debug('detach()');
     await this.send({ janus: 'detach' });
 
     this.attached = false;
@@ -133,7 +133,7 @@ const methods = {
    * takes too long. Resolved otherwise.
    */
   async send(obj) {
-    this.log.debug('send()');
+    this.logger.debug('send()');
     return this.session.send({ ...obj, handle_id: this.id });
   },
 
@@ -225,17 +225,23 @@ const methods = {
  * We only keep track of uptime.
  */
 function init({
-  log = {
+  logger = {
     info() {},
     warn() {},
     debug() {},
     error() {},
   },
 } = {}) {
-  this.log = log;
+  /**
+   * @member {Object}
+   * @property {Function} info - Called for log level 'info'
+   * @property {Function} warn - Called for log level 'warn'
+   * @property {Function} debug - Called for log level 'debug'
+   * @property {Function} error - Called for log level 'error'
+   */
+  this.logger = logger;
 }
 
-// mix in event emitter behavior
 Object.assign(methods, EventEmitter({ emit_prop: 'emit' }));
 
 export default {

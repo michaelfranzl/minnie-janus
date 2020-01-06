@@ -92,7 +92,7 @@ const methods = {
       return;
     }
 
-    this.log.info('received message but not yet implemented', msg);
+    this.logger.info('Received message from Janus', msg);
   },
 
   /**
@@ -111,27 +111,33 @@ const methods = {
   async onAttached() {
     this.negotiateIce(); // negotiate ICE in parallel. Promise resolves when ICE is negotiated.
 
-    this.log.info('Asking user to share media...');
 
+    this.logger.info('Asking user to share media. Please wait...');
     const localmedia = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,
     });
+    this.logger.info('Got local user media.');
 
     this.rtcconn.addStream(localmedia);
     this.vid_local.srcObject = localmedia;
     this.vid_local.play();
 
-    this.log.info('User shared local media. Creating offer...');
+    this.logger.info('Adding local user media to RTCPeerConnection.');
     const jsepOffer = await this.rtcconn.createOffer({
       audio: true,
       video: true,
     });
-    this.log.info('SDP offer created. Setting it on rtcconn and submitting it to the server...');
+    this.logger.info('SDP offer created.');
+
+    this.logger.info('Setting SDP offer on RTCPeerConnection');
     this.rtcconn.setLocalDescription(jsepOffer);
 
+    this.logger.info('Getting SDP answer from Janus to our SDP offer. Please wait...');
     const { jsep: jsepAnswer } = await this.sendJsep(jsepOffer);
-    this.log.debug('received SDP answer');
+    this.logger.debug('Received SDP answer from Janus.');
+
+    this.logger.debug('Setting the SDP answer on RTCPeerConnection. The `onaddstream` event will fire soon.');
     this.rtcconn.setRemoteDescription(jsepAnswer);
   },
 };
@@ -142,7 +148,7 @@ function init() {
 
   this.rtcconn = new RTCPeerConnection();
   this.rtcconn.onaddstream = (event) => {
-    this.log.info('RTCPeerConnection got remote media stream. Playing.');
+    this.logger.info('RTCPeerConnection got remote media stream. Playing.');
     this.vid_remote.srcObject = event.stream;
     this.vid_remote.play();
   };

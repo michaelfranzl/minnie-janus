@@ -28,7 +28,7 @@ loglevel.enableAll();
 
 // instantiate one session
 const session = Session({
-  log: loglevel,
+  logger: loglevel,
 });
 window.session = session; // for direct access in console
 

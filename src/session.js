@@ -72,7 +72,7 @@ const methods = {
    */
   async destroy() {
     const pluginDetachPromises = Object.entries(this.plugins).map(([, plugin]) => {
-      this.log.debug('Detaching plugin before destroying session', plugin.instance.name);
+      this.logger.debug('Detaching plugin before destroying session', plugin.instance.name);
       return plugin.instance.detach();
     });
 
@@ -81,10 +81,10 @@ const methods = {
     this.stopKeepalive();
 
     Object.entries(this.plugins).forEach(([id, plugin]) => {
-      this.log.debug(`Removing reference to plugin ${plugin.instance.name} (${id})`);
+      this.logger.debug(`Removing reference to plugin ${plugin.instance.name} (${id})`);
       clearTimeout(plugin.timeout_cleanup);
       delete this.plugins[id];
-      this.log.debug(`Remaining plugins: ${Object.keys(this.plugins)}`);
+      this.logger.debug(`Remaining plugins: ${Object.keys(this.plugins)}`);
     });
     return response;
   },
@@ -100,21 +100,21 @@ const methods = {
    * takes too long. Resolved otherwise.
    */
   async attachPlugin(plugin) {
-    this.log.debug(`Attaching plugin ${plugin.name}`);
-
+    this.logger.debug(`Attaching plugin ${plugin.name}`);
     const response = await plugin.attach(this);
 
     plugin.once('detached', () => {
-      this.log.debug(`Plugin ${plugin.name} detached.`);
+      this.logger.debug(`Plugin ${plugin.name} detached.`);
       this.plugins[plugin.id].timeout_cleanup = setTimeout(() => {
-        this.log.debug(`Removing reference to plugin ${plugin.name} (${plugin.id})`);
+        this.logger.debug(`Removing reference to plugin ${plugin.name} (${plugin.id})`);
         delete this.plugins[plugin.id];
-        this.log.debug(`Remaining plugins: ${Object.keys(this.plugins)}`);
+        this.logger.debug(`Remaining plugins: ${Object.keys(this.plugins)}`);
       }, 30000);
     });
 
-    this.log.info(`Plugin ${plugin.name} attached.`);
     this.plugins[response.data.id] = { instance: plugin, timeout_cleanup: null };
+    this.logger.info(`Plugin ${plugin.name} attached.`);
+
     this.emit('plugin_attached', response);
     return response;
   },
@@ -128,7 +128,7 @@ const methods = {
    * @param {Object} msg - Object parsed from server-side JSON
    */
   receive(msg) {
-    this.log.debug('Receiving message from Janus', msg);
+    this.logger.debug('Receiving message from Janus', msg);
 
     if (msg.session_id && msg.session_id !== this.id) {
       throw new Error('Got passed a message which is not for this session.');
@@ -148,7 +148,7 @@ const methods = {
         delete this.transactions[msg.transaction];
 
         if (msg.janus === 'error') {
-          this.log.debug(`Got error ${msg.error.code} from Janus. \
+          this.logger.debug(`Got error ${msg.error.code} from Janus. \
           Will reject promise.`, msg.error.reason);
           transaction.reject(msg.error);
           return;
@@ -194,6 +194,7 @@ const methods = {
     this.next_transaction_id += 1;
     const transaction = this.next_transaction_id.toString();
     const payload = { ...msg, transaction };
+
     if (this.id) payload.session_id = this.id;
 
     const responsePromise = new Promise((resolve, reject) => {
@@ -207,7 +208,7 @@ const methods = {
       };
     });
 
-    this.log.debug('Outgoing Janus message', payload);
+    this.logger.debug('Outgoing Janus message', payload);
     this.emit('output', payload);
     this.resetKeepalive();
 
@@ -220,7 +221,7 @@ const methods = {
    * Call this before unreferencing an instance.
    */
   stop() {
-    this.log.debug('stop()');
+    this.logger.debug('stop()');
     this.stopKeepalive();
   },
 
@@ -228,13 +229,13 @@ const methods = {
     try {
       this.send({ janus: 'keepalive' });
     } catch (err) {
-      this.log.error('Keepalive timed out');
+      this.logger.error('Keepalive timed out');
       this.emit('keepalive_timout');
     }
   },
 
   stopKeepalive() {
-    this.log.debug('stopKeepalive()');
+    this.logger.debug('stopKeepalive()');
     if (this.keepalive_timeout) clearTimeout(this.keepalive_timeout);
   },
 
@@ -250,14 +251,14 @@ Object.assign(methods, EventEmitter({ emit_prop: 'emit' }));
 function init({
   timeoutMs = 5000,
   keepaliveMs = 50000,
-  log = {
+  logger = {
     info() {},
     warn() {},
     debug() {},
     error() {},
   },
 } = {}) {
-  this.log = log;
+  this.logger = logger;
   this.options.timeoutMs = timeoutMs;
   this.options.keepaliveMs = keepaliveMs;
 }
