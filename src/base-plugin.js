@@ -1,5 +1,3 @@
-/* jshint esversion: 6 */
-
 /*
 minnie-janus - Minimal and modern JavaScript interface for the Janus WebRTC gateway
 
@@ -21,46 +19,63 @@ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-
 /**
- * The base behavior of a plugin: Attach/detach and send/receive
- * messages to/from the server-side plugin.
- *
- * This behavior is supposed to be 'subclassed', and some of the methods
- * overridden, because every janus plugin is different.
- *
- * This is intentionally not implemented as a class or a function
- * (constructor-prototype combination) . Rather, properties, methods and an
- * initializer/constructor are exported explicitly as plain objects for maximum
- * flexibility regarding different JS ways of
- * inheriting/subclassing/extending/mixing.
- *
- * See `/demo/echotest-plugin.js` for usage.
- *
- * @typedef {Object} BasePlugin
+ * @module
  */
 
 import EventEmitter from '@michaelfranzl/captain-hook';
 
+/**
+ * @lends BasePlugin
+ */
 const properties = {
-  session: null, // an instance of Session (see `session.js`)
-  id: null, // on the server, this is called the 'handle'
-  name: 'unset', // the plugin name string in the C source code
-  label: 'unset', // just used for shorter debugging
+  /**
+   * The plugin name string in the C source code.
+   * @member {String}
+   * @instance
+   * @readonly
+   */
+  name: null,
+
+  /**
+   * The session to which this plugin is attached. An instance of {@link Session}.
+   * @member {Session}
+   * @instance
+   * @readonly
+   */
+  session: null,
+
+  /**
+   * The server-side "plugin handle"
+   * @member {String}
+   * @instance
+   * @readonly
+   */
+  id: null,
+
+  /**
+   * Is this plugin attached on the server?
+   * @member {Boolean}
+   * @instance
+   * @readonly
+   */
   attached: false,
 };
 
+/**
+ * @lends BasePlugin.prototype
+ */
 const methods = {
   /**
-   * Attach the server-side plugin (identified by `this.name`) to the session.
+   * Attach the server-side plugin (identified by {@link BasePlugin#name}) to the session. Meant to
+   * be called only by {@link Session}.
    *
-   * The method `this.onAttached()` will be called.
+   * The method {@link BasePlugin#onAttached} will be called.
    *
-   * The event 'attached' will be emitted additionally for potential subscribers.
-   *
-   * @param {Session} - A Session instance (see `session.js`)
-   *
-   * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
+   * @public
+   * @param {Session} session - An instance of {@link Session}
+   * @emits BasePlugin#attached
+   * @returns {Promise} Rejected if synchronous reply contains `janus: 'error'` or response
    * takes too long. Resolved otherwise.
    */
   async attach(session) {
@@ -78,12 +93,15 @@ const methods = {
     this.id = response.data.id;
     this.attached = true;
     this.onAttached();
+
+    /** @event BasePlugin#attached */
     this.emit('attached');
 
     return response;
   },
 
   /**
+   * @protected
    * @abstract
    */
   onAttached() {
@@ -91,6 +109,7 @@ const methods = {
   },
 
   /**
+   * @protected
    * @abstract
    */
   onDetached() {
@@ -98,16 +117,13 @@ const methods = {
   },
 
   /**
-   * Detach this plugin from the session.
+   * Detach this plugin from the session. Meant to be called only from {@link Session}.
    *
-   * The method `this.onDetached()` will be called.
+   * The method {@link BasePlugin#onDetached} will be called.
    *
-   * The event 'detached' will be emitted additionally.
-   *
-   * Janus will also push an event `janus: 'detached'`.
-   *
-   * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
-   * takes too long. Resolved otherwise.
+   * @public
+   * @returns {Promise} Response from janus-gateway.
+   * @emits BasePlugin#detached
    */
   async detach() {
     this.logger.debug('detach()');
@@ -115,22 +131,19 @@ const methods = {
 
     this.attached = false;
     this.onDetached();
+    /** @event BasePlugin#detached */
     this.emit('detached');
   },
 
   /**
-   * Send a plugin-related message to the janus core.
+   * @private
+   * @param {Object} obj - Should be JSON-serializable. Expected to have a key 'janus'
+   * with one of the following values: 'attach|detach|message|trickle|hangup'
    *
-   * You should prefer the higher-level methods
-   * `sendMessage(), sendTrickle(), attach(), detach(), hangup()`
-   *
-   * @param {Object} obj - Should be JSON-serializable. Excpected to have a key
-   * called 'janus' with one of the following values:
-   * 'attach|detach|message|trickle|hangup'
-   * @see {@link https://janus.conf.meetecho.com/docs/rest.html}
-   *
-   * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
+   * @returns {Promise} Rejected if synchronous reply contains `janus: 'error'` or response
    * takes too long. Resolved otherwise.
+   *
+   * @see {@link https://janus.conf.meetecho.com/docs/rest.html}
    */
   async send(obj) {
     this.logger.debug('send()');
@@ -143,13 +156,13 @@ const methods = {
    * Janus will call the plugin C function `.handle_message` with the provided
    * arguments.
    *
+   * @public
    * @param {Object} body - Should be JSON-serializable. Janus expects this. Will be
    * provided to the `.handle_message` C function as `json_t *message`.
    * @param {Object} [jsep] - Should be JSON-serializable. Will be provided to the
    * `.handle_message` C function as `json_t *jsep`.
    *
-   * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
-   * takes too long. Resolved otherwise.
+   * @returns {Promise} Response from janus-gateway.
    */
   async sendMessage(body = {}, jsep) {
     const msg = {
@@ -157,72 +170,88 @@ const methods = {
       body, // required. 3rd argument in the server-side .handle_message() function
     };
     if (jsep) msg.jsep = jsep; // 'jsep' is a recognized key by Janus. 4th arg in .handle_message().
-    this.log.debug('sendMessage()');
+    this.logger.debug('sendMessage()');
     return this.send(msg);
   },
 
   /**
    * Alias for `sendMessage({}, jsep)`
    *
+   * @public
    * @param {Object} jsep - Should be JSON-serializable. Will be provided to the
    * `.handle_message` C function as `json_t *jsep`.
    *
-   * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
-   * takes too long. Resolved otherwise.
+   * @returns {Promise} Response from janus-gateway.
    */
   async sendJsep(jsep) {
-    this.log.debug('sendJsep()');
+    this.logger.debug('sendJsep()');
     return this.sendMessage({}, jsep);
   },
 
   /**
    * Send trickle ICE candidates to the janus core, related to this plugin.
    *
-   * @param {[Object|Array|null]} candidate - Should be JSON-serializable.
+   * @public
+   * @param {(Object|Array|null)} candidate Should be JSON-serializable.
    *
-   * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
-   * takes too long. Resolved otherwise.
+   * @returns {Promise} Response from janus-gateway.
    */
   async sendTrickle(candidate) {
-    this.log.debug('sendTrickle()');
+    this.logger.debug('sendTrickle()');
     return this.send({ janus: 'trickle', candidate });
   },
 
   /**
    * Hangup the WebRTC peer connection, but keep the plugin attached.
    *
-   * @returns {Promise} - Rejected if synchronous reply contains `janus: 'error'` or response
-   * takes too long. Resolved otherwise.
+   * @public
+   * @returns {Promise} Response from janus-gateway.
    */
   async hangup() {
-    this.log.debug('hangup()');
+    this.logger.debug('hangup()');
     return this.send({ janus: 'hangup' });
   },
 
   /**
-   * Receive an asynchronous (pushed) message sent by the Janus core.
+   * Receive an asynchronous ('pushed') message sent by the Janus core.
    *
-   * Such messages have a 'sender' key and usually contain
-   * `janus: 'event|media|webrtcup|slowlink|hangup'`
+   * The parent Session instance is responsible for dispatching messages here. You should have no
+   * need of calling this method directly.
    *
-   * The parent Session is responsible for dispatching such messages here.
-   * (see session.js).
+   * This method always contains plugin-specific logic and can be overridden.
    *
-   * This method always contains plugin-specific logic and should be overridden.
-   *
+   * @protected
    * @abstract
    * @param {Object} msg - Object parsed from server-side JSON
    */
   async receive(msg) {
-    this.log.debug(`Abstract method 'receive' called with message ${msg}`);
+    this.logger.debug(`Abstract method 'receive' called with message ${msg}`);
   },
 };
 
-
 /**
- * Constructor/initializer for this plugin.
+ * @constructs BasePlugin
+ * @mixes EventEmitter
  *
- * We only keep track of uptime.
+ * @classdesc
+ *
+ * This is a mixin which implements the base behavior of a plugin: Attach/detach and
+ * send/receive messages to/from the server-side plugin.
+ *
+ * This is intentionally not implemented as a class or a function (constructor-prototype
+ * combination). Rather, properties, methods and an initializer/constructor are exported separately
+ * as plain objects for maximum flexibility regarding different JS ways of
+ * inheriting/subclassing/extending/mixing.
+ *
+ * See /demo/echotest-plugin.js for usage.
+ *
+ * @param {Object} [options={}]
+ * @param {Object} [options.logger] - The logger to use
+ * @param {Function} [options.logger.info=function(){}]
+ * @param {Function} [options.logger.warn=function(){}]
+ * @param {Function} [options.logger.debug=function(){}]
+ * @param {Function} [options.logger.error=function(){}]
+ * @return {BasePlugin}
  */
 function init({
   logger = {

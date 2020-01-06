@@ -19,22 +19,29 @@ OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/**
+ * @module
+ */
+
 import BasePlugin from '../src/base-plugin-stamp.js';
 
+/**
+ * @lends EchotestPlugin
+ */
 const properties = {
-  // `name` must match the plugin name string in the C source code
+  /**
+   * @override
+   */
   name: 'janus.plugin.echotest',
-  // `label` is just used for shorter debugging
-  label: 'echotest',
-  // The RTCPeerConnection
+
   rtcconn: null,
   vid_remote: document.createElement('video'),
   vid_local: document.createElement('video'),
 };
 
 /**
-* Methods to add to or overwrite in BasePlugin
-*/
+ * @lends EchotestPlugin.prototype
+ */
 const methods = {
   async negotiateIce() {
     return new Promise((resolve) => {
@@ -49,40 +56,43 @@ const methods = {
   },
 
   /**
-   * Tell the echotest plugin to forward video or not.
+   * Start or stop echoing video.
    *
-   * @param {bool} enabled
+   * @public
+   * @param {Boolean} enabled
+   * @return {Object} The response from Janus
    */
   async setVideo(enabled) {
     this.sendMessage({ video: enabled });
   },
 
   /**
-   * Tell the echotest plugin to forward audio or not.
+   * Start or stop echoing audio.
    *
-   * @param {bool} enabled
+   * @public
+   * @param {Boolean} enabled
+   * @return {Object} The response from Janus
    */
   async setAudio(enabled) {
     this.sendMessage({ audio: enabled });
   },
 
   /**
-   * Tell the echotest plugin to send a REMB packet to the browser to limit bandwidth.
+   * Send a REMB packet to the browser to set the media submission bandwidth.
    *
-   * @param {integer} bitrate
+   * @public
+   * @param {Number} bitrate - Bits per second
+   * @return {Object} The response from Janus
    */
   async setBitrate(bitrate) {
     this.sendMessage({ bitrate });
   },
 
   /**
-   * Receive a message from the server and interpret it.
+   * Receive an asynchronous ('pushed') message sent by the Janus core.
    *
-   * This method overrides the one in BasePlugin (which does nothing).
-   *
-   * The parent app is responsible for connecting the message transport to this method.
-   *
-   * @param {Object} msg - The parsed JSON from the server
+   * @public
+   * @override
    */
   receive(msg) {
     if (msg.janus === 'detached') {
@@ -96,17 +106,16 @@ const methods = {
   },
 
   /**
-   * Business logic for when the echotest plugin is attached server-side.
-   *
-   * This method overrides the one in BasePlugin (which does nothing).
-   *
-   * This sets up a bi-directional WebRTC connection which usually involves the following:
+   * Set up a bi-directional WebRTC connection:
    *
    * 1. get local media
    * 2. create and send a SDP offer
    * 3. receive a SDP answer and add it to the RTCPeerConnection
-   * 4. negotiate ICE (can be in parallel to the SDP exchange)
+   * 4. negotiate ICE (can happen concurrently with the SDP exchange)
    * 5. Play the video via the `onaddstream` event of RTCPeerConnection
+   *
+   * @private
+   * @override
    */
   async onAttached() {
     this.negotiateIce(); // negotiate ICE in parallel. Promise resolves when ICE is negotiated.
@@ -142,11 +151,17 @@ const methods = {
   },
 };
 
+/**
+ * @constructs EchotestPlugin
+ * @mixes BasePlugin
+ */
 function init() {
   this.vid_remote.width = 320;
   this.vid_local.width = 320;
 
   this.rtcconn = new RTCPeerConnection();
+
+  // RTCPeerconnection#onaddstream fires after the SDP answer has been set.
   this.rtcconn.onaddstream = (event) => {
     this.logger.info('RTCPeerConnection got remote media stream. Playing.');
     this.vid_remote.srcObject = event.stream;
