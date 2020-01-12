@@ -143,10 +143,6 @@ const methods = {
   receive(msg) {
     this.logger.debug('Receiving message from Janus', msg);
 
-    if (msg.session_id && msg.session_id !== this.id) {
-      throw new Error('Got passed a message which is not for this session.');
-    }
-
     // If there is a transaction property, then this is a reply to a message which we have sent
     // previously.
     if (msg.transaction) {
