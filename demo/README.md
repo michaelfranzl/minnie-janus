@@ -21,18 +21,17 @@ However, it is trivial to add the rest of the server-side plugin features.
 This demo application (see `index.js`) will create one `Session` instance (from `../src/session.js`)
 and one `EchotestPlugin` instance (see `echotest-plugin.js`) inheriting from `BasePlugin` (from
 `../src/base-plugin.js`). Both instances are attached to `window` so you can directly access them in
-the development console as global variables `session` and `echotest_plugin`, for example:
+the development console as global variables `session` and `echotestPlugin`, for example:
 
 
 ````javascript
-    echotest_plugin.setVideo(false);
-    echotest_plugin.setVideo(true);
-    echotest_plugin.setAudio(false);
-    echotest_plugin.setAudio(true);
-    echotest_plugin.setBitrate(100000); // kilobits/second
+    echotestPlugin.enableVideo(false);
+    echotestPlugin.enableVideo(true);
+    echotestPlugin.enableAudio(false);
+    echotestPlugin.enableAudio(true);
+    echotestPlugin.setBitrate(100000); // bits/second
 
-    echotest_plugin.uptime; // seconds since started
-    echotest_plugin.detach();
+    echotestPlugin.detach();
     session.destroy();
 ````
 

@@ -1,3 +1,5 @@
+/* eslint-disable import/extensions */
+
 /*
 minnie-janus - Minimal and modern JavaScript interface for the Janus WebRTC gateway
 
@@ -20,48 +22,50 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 import 'webrtc-adapter';
-import Session from '../src/session-stamp.js';
-import EchotestPlugin from './echotest-plugin.js'; // extends base-plugin.js
 import loglevel from 'loglevel';
+
+import Session from '../src/session-stamp.js';
+import EchotestPlugin from './echotest-plugin.js';
 
 loglevel.enableAll();
 
-// instantiate one session
 const session = Session({
   logger: loglevel,
 });
 window.session = session; // for direct access in console
 
-const ws = new WebSocket('ws://localhost:8188', 'janus-protocol');
+const websocket = new WebSocket('ws://localhost:8188', 'janus-protocol');
 
-// Outgoing communications to janus-gateway.
-session.on('output', (msg) => ws.send(JSON.stringify(msg)));
+// Outgoing communications to Janus.
+session.on('output', (msg) => websocket.send(JSON.stringify(msg)));
 
-// Incoming communications from janus-gateway.
-ws.addEventListener('message', (event) => session.receive(JSON.parse(event.data)));
+// Incoming communications from Janus.
+websocket.addEventListener('message', (event) => session.receive(JSON.parse(event.data)));
 
 // Create a session server-side once WebSocket is connected.
-ws.addEventListener('open', async () => {
+websocket.addEventListener('open', async () => {
   try {
     await session.create();
-    console.log(`Session with ID ${session.id} created.`);
+    loglevel.info(`Session with ID ${session.id} created.`);
   } catch (err) {
-    console.log('Error during creation of session', err);
+    loglevel.error('Error during creation of session', err);
     return;
   }
 
-  const echotestPlugin = EchotestPlugin();
-  window.echotest_plugin = echotestPlugin; // for direct access in console
+  const echotestPlugin = EchotestPlugin({
+    logger: loglevel,
+  });
+  window.echotestPlugin = echotestPlugin; // for direct access in console
 
   try {
     await session.attachPlugin(echotestPlugin);
-    console.log(`Echotest plugin attached with handle/ID ${echotestPlugin.id}`);
+    loglevel.info(`Echotest plugin attached with handle/ID ${echotestPlugin.id}`);
   } catch (err) {
-    console.log('Error during attaching of plugin', err);
+    loglevel.error('Error during attaching of plugin', err);
   }
 });
 
-ws.addEventListener('close', () => {
-  console.warn('janus-gateway went away');
-  session.stop(); // No point in continuing sending keepalives if the server is down.
+websocket.addEventListener('close', () => {
+  loglevel.warn('No connection to Janus');
+  session.stop();
 });

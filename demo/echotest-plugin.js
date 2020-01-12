@@ -1,3 +1,5 @@
+/* eslint-disable import/extensions */
+
 /*
 minnie-janus - Minimal and modern JavaScript interface for the Janus WebRTC gateway
 
@@ -43,18 +45,6 @@ const properties = {
  * @lends EchotestPlugin.prototype
  */
 const methods = {
-  async negotiateIce() {
-    return new Promise((resolve) => {
-      this.rtcconn.onicecandidate = async (event) => {
-        await this.sendTrickle(event.candidate || null);
-        if (!event.candidate) {
-          this.log.info('Janus received last ICE candidate.');
-          resolve();
-        }
-      };
-    });
-  },
-
   /**
    * Start or stop echoing video.
    *
@@ -62,8 +52,8 @@ const methods = {
    * @param {Boolean} enabled
    * @return {Object} The response from Janus
    */
-  async setVideo(enabled) {
-    this.sendMessage({ video: enabled });
+  async enableVideo(enabled) {
+    return this.sendMessage({ video: enabled });
   },
 
   /**
@@ -73,8 +63,8 @@ const methods = {
    * @param {Boolean} enabled
    * @return {Object} The response from Janus
    */
-  async setAudio(enabled) {
-    this.sendMessage({ audio: enabled });
+  async enableAudio(enabled) {
+    return this.sendMessage({ audio: enabled });
   },
 
   /**
@@ -85,7 +75,7 @@ const methods = {
    * @return {Object} The response from Janus
    */
   async setBitrate(bitrate) {
-    this.sendMessage({ bitrate });
+    return this.sendMessage({ bitrate });
   },
 
   /**
@@ -95,13 +85,6 @@ const methods = {
    * @override
    */
   receive(msg) {
-    if (msg.janus === 'detached') {
-      this.attached = false;
-      this.log.info('now detached');
-      // this._emit('detached'); // inform the parent app if useful
-      return;
-    }
-
     this.logger.info('Received message from Janus', msg);
   },
 
@@ -118,9 +101,6 @@ const methods = {
    * @override
    */
   async onAttached() {
-    this.negotiateIce(); // negotiate ICE in parallel. Promise resolves when ICE is negotiated.
-
-
     this.logger.info('Asking user to share media. Please wait...');
     const localmedia = await navigator.mediaDevices.getUserMedia({
       audio: true,
@@ -128,11 +108,14 @@ const methods = {
     });
     this.logger.info('Got local user media.');
 
-    this.rtcconn.addStream(localmedia);
+    this.logger.info('Playing local user media in video element.');
     this.vid_local.srcObject = localmedia;
     this.vid_local.play();
 
     this.logger.info('Adding local user media to RTCPeerConnection.');
+    this.rtcconn.addStream(localmedia);
+
+    this.logger.info('Creating SDP offer. Please wait...');
     const jsepOffer = await this.rtcconn.createOffer({
       audio: true,
       video: true,
@@ -166,6 +149,11 @@ function init() {
     this.logger.info('RTCPeerConnection got remote media stream. Playing.');
     this.vid_remote.srcObject = event.stream;
     this.vid_remote.play();
+  };
+
+  // Send ICE events to Janus.
+  this.rtcconn.onicecandidate = (event) => {
+    this.sendTrickle(event.candidate || null);
   };
 
   this.vid_local.controls = true;
