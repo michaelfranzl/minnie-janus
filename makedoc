@@ -1,0 +1,3 @@
+#!/bin/bash
+
+rm -rf doc && jsdoc --debug --verbose -c jsdoc-conf.json -d doc --access all src demo
