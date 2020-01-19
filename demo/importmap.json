@@ -2,13 +2,13 @@
   "imports": {
     "@michaelfranzl/captain-hook": "/jspm_packages/npm/@michaelfranzl/captain-hook@1.0.2/src/captain-hook.js",
     "@stamp/it": "/jspm_packages/npm/@stamp/it@1.1.0/index.js",
-    "loglevel": "/jspm_packages/npm/loglevel@1.6.4/lib/loglevel.js",
-    "webrtc-adapter": "/jspm_packages/npm/webrtc-adapter@7.3.0/dist/adapter_core.js",
+    "loglevel": "/jspm_packages/npm/loglevel@1.6.6/lib/loglevel.js",
+    "webrtc-adapter": "/jspm_packages/npm/webrtc-adapter@7.4.0/dist/adapter_core.js",
     "@stamp/core/": "/jspm_packages/npm/@stamp/core@1.0.1/",
     "@stamp/is/": "/jspm_packages/npm/@stamp/is@1.0.0/",
     "@stamp/compose/": "/jspm_packages/npm/@stamp/compose@1.0.2/",
     "@stamp/shortcut/": "/jspm_packages/npm/@stamp/shortcut@1.0.2/",
-    "sdp/": "/jspm_packages/npm/sdp@2.10.0/",
+    "sdp/": "/jspm_packages/npm/sdp@2.12.0/",
     "rtcpeerconnection-shim/": "/jspm_packages/npm/rtcpeerconnection-shim@1.2.15/"
   }
 }

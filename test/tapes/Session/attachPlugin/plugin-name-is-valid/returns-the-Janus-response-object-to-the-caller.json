@@ -1,0 +1,80 @@
+[
+  {
+    "incoming": false,
+    "payload": {
+      "janus": "create",
+      "transaction": "1"
+    }
+  },
+  {
+    "incoming": true,
+    "payload": {
+      "janus": "success",
+      "transaction": "1",
+      "data": {
+        "id": 8494293641989571
+      }
+    }
+  },
+  {
+    "incoming": false,
+    "payload": {
+      "janus": "attach",
+      "plugin": "janus.plugin.echotest",
+      "transaction": "2",
+      "session_id": 8494293641989571
+    }
+  },
+  {
+    "incoming": true,
+    "payload": {
+      "janus": "success",
+      "session_id": 8494293641989571,
+      "transaction": "2",
+      "data": {
+        "id": 282538129186337
+      }
+    }
+  },
+  {
+    "incoming": false,
+    "payload": {
+      "janus": "detach",
+      "handle_id": 282538129186337,
+      "transaction": "3",
+      "session_id": 8494293641989571
+    }
+  },
+  {
+    "incoming": true,
+    "payload": {
+      "janus": "success",
+      "session_id": 8494293641989571,
+      "transaction": "3"
+    }
+  },
+  {
+    "incoming": true,
+    "payload": {
+      "janus": "detached",
+      "session_id": 8494293641989571,
+      "sender": 282538129186337
+    }
+  },
+  {
+    "incoming": false,
+    "payload": {
+      "janus": "destroy",
+      "transaction": "4",
+      "session_id": 8494293641989571
+    }
+  },
+  {
+    "incoming": true,
+    "payload": {
+      "janus": "success",
+      "session_id": 8494293641989571,
+      "transaction": "4"
+    }
+  }
+]

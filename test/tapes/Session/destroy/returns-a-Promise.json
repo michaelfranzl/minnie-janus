@@ -1,0 +1,35 @@
+[
+  {
+    "incoming": false,
+    "payload": {
+      "janus": "create",
+      "transaction": "1"
+    }
+  },
+  {
+    "incoming": true,
+    "payload": {
+      "janus": "success",
+      "transaction": "1",
+      "data": {
+        "id": 7715828927160058
+      }
+    }
+  },
+  {
+    "incoming": false,
+    "payload": {
+      "janus": "destroy",
+      "transaction": "2",
+      "session_id": 7715828927160058
+    }
+  },
+  {
+    "incoming": true,
+    "payload": {
+      "janus": "success",
+      "session_id": 7715828927160058,
+      "transaction": "2"
+    }
+  }
+]
