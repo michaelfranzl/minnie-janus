@@ -7,8 +7,8 @@ API](https://janus.conf.meetecho.com/docs/rest.html), for browsers as well as No
 
 Inspiration came from the project [minijanus](https://github.com/mozilla/minijanus.js) (hence this
 name, 'minnie-janus'), but this is a rewrite from scratch because I needed ES modules, events,
-async/await syntax, better logging, and a fix of one small (API
-issue)[https://github.com/mozilla/minijanus.js/issues/3] in minijanus.
+async/await syntax, better logging, and a fix of one small
+[API issue](https://github.com/mozilla/minijanus.js/issues/3) in minijanus.
 
 Provided are two behavior implementations, `Session` (see [src/session.js](src/session.js)) and
 `BasePlugin` (see [src/base-plugin.js](src/base-plugin.js)), which transparently map to their
