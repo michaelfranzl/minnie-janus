@@ -52,7 +52,8 @@ websocket.addEventListener('open', async () => {
     return;
   }
 
-  const echotestPlugin = EchotestPlugin({
+  // if EchotestPlugin is a Stamp or a factory function, then the `new` keyword is optional.
+  const echotestPlugin = new EchotestPlugin({
     logger: loglevel,
   });
   window.echotestPlugin = echotestPlugin; // for direct access in console

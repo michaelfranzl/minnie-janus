@@ -25,7 +25,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * @module
  */
 
-import BasePlugin from '../src/base-plugin-stamp.js';
+import BasePluginStamp from '../src/base-plugin-stamp.js';
 
 /**
  * @lends EchotestPlugin
@@ -165,7 +165,70 @@ function init() {
   document.body.appendChild(this.vid_remote);
 }
 
-const factory = BasePlugin.compose({
+// Extend BasePlugin and export a factory function which directly returns an instance.
+/*
+import basePlugin from '../src/base-plugin.js';
+
+function factory(...args) {
+  const prototype = {
+    ...basePlugin.properties,
+    ...basePlugin.methods,
+    ...methods,
+    ...properties,
+  };
+  const instance = Object.create(prototype);
+  basePlugin.init.call(instance, ...args);
+  init.call(instance, ...args);
+
+  return instance;
+}
+export default factory;
+*/
+
+// Extend BasePlugin and export a constructor function which returns an instance using the `new`
+// keyword.
+/*
+import basePlugin from '../src/base-plugin.js';
+
+function EchotestPlugin(...args) {
+  basePlugin.init.call(this, ...args);
+  init.call(this, ...args);
+}
+
+Object.assign(EchotestPlugin.prototype, basePlugin.properties);
+Object.assign(EchotestPlugin.prototype, basePlugin.methods);
+Object.assign(EchotestPlugin.prototype, methods); // your own methods
+Object.assign(EchotestPlugin.prototype, properties); // your own properties
+
+export default EchotestPlugin;
+*/
+
+// Extend BasePlugin and return a class, which returns an instance using the `new` keyword.
+/*
+import basePlugin from '../src/base-plugin.js';
+
+function BasePlugin(...args) {
+  basePlugin.init.call(this, ...args);
+}
+
+Object.assign(BasePlugin.prototype, basePlugin.properties);
+Object.assign(BasePlugin.prototype, basePlugin.methods);
+
+class EchotestPlugin extends BasePlugin {
+  constructor(...args) {
+    super(...args);
+    init.call(this, ...args);
+  }
+}
+
+Object.assign(EchotestPlugin.prototype, properties);
+Object.assign(EchotestPlugin.prototype, methods);
+
+export default EchotestPlugin;
+*/
+
+// Extend BasePlugin and return a "Stamp", which directly returns an instance.
+const factory = BasePluginStamp.compose({
   methods,
   properties,
   initializers: [init],

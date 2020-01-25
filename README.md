@@ -32,106 +32,16 @@ The implementation has been tested with janus-gateway version tag 0.7.4.
 Source code is documented.
 
 
-## How to extend BasePlugin
+## How to use BasePlugin
 
-The 'echotest' [demo](demo) contained in this repository extends `BasePlugin` with so-called
-"Stamps", but this section gives you examples of different ways.
+The 'echotest' [demo](demo) contained in this repository extends `BasePlugin` with plugin-specific
+behavior and exports a "Stamp", but also gives examples how to extend `BasePlugin` and return ...
 
-### Using "Stamps"
+* a factory function,
+* a constructor function,
+* a class.
 
-Read about "Stamps" here:
-
-https://medium.com/@koresar/fun-with-stamps-episode-1-stamp-basics-e0627d81efe0
-https://www.npmjs.com/package/@stamp/it
-
-The following will export a factory function (invokable with or without the `new` keyword).
-
-```javascript
-import BasePlugin from '../src/base-plugin-stamp.js';
-
-const factory = BasePlugin.compose({
-  methods, // your own methods
-  properties, // your own properties
-  initializers: [init], // your own initializer(s)
-});
-export default factory;
-```
-
-
-### Using a factory function
-
-If you prefer to use a factory function in your parent app (invokable without the `new` keyword),
-here is how you would extend `BasePlugin` using plain-object OOP:
-
-```javascript
-import base_plugin from '../src/base-plugin.js';
-
-let factory = function(...args) {
-  let prototype = Object.assign(
-    {},
-    base_plugin.properties,
-    base_plugin.methods,
-    methods, // your own methods
-    properties, // your own properties
-  );
-  let instance = Object.create(prototype);
-
-  base_plugin.init.call(instance, ...args); // equivalent to super(...args)
-  init.call(instance, ...args);
-
-  return instance;
-};
-export default factory;
-```
-
-
-### Using instantiation
-
-If you prefer to use the `new` keyword, here is how you would extend `BasePlugin`:
-
-```javascript
-import base_plugin from '../src/base-plugin.js';
-
-function EchotestPlugin(...args) {
-  base_plugin.init.call(this, ...args);
-  init.call(this, ...args);
-}
-
-Object.assign(EchotestPlugin.prototype, base_plugin.properties);
-Object.assign(EchotestPlugin.prototype, base_plugin.methods);
-Object.assign(EchotestPlugin.prototype, methods); // your own methods
-Object.assign(EchotestPlugin.prototype, properties); // your own properties
-
-export default EchotestPlugin;
-```
-
-
-### Using classes
-
-If you prefer to use a class to extend `BasePlugin`:
-
-```javascript
-import base_plugin from '../src/base-plugin.js';
-
-function BasePlugin(...args) {
-  base_plugin.init.call(this, ...args);
-}
-
-Object.assign(BasePlugin.prototype, base_plugin.properties);
-Object.assign(BasePlugin.prototype, base_plugin.methods);
-
-class EchotestPlugin extends BasePlugin {
-  constructor(...args) {
-    super(...args);
-    init.call(this, ...args);
-  }
-}
-
-Object.assign(EchotestPlugin.prototype, properties); // your own properties
-Object.assign(EchotestPlugin.prototype, methods); // your own methods
-
-export default EchotestPlugin;
-```
+By the way, "Stamps" are an awesome way to compose objects in OOP. See: https://github.com/stampit-org/stampit
 
 # License
 
