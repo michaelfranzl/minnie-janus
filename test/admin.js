@@ -1,11 +1,13 @@
 /* eslint-disable prefer-arrow-callback, func-names */
 
-import { expect } from 'chai';
+import chai from 'chai';
 
-import Session from '../src/session-stamp';
+import Session from '../src/session-stamp.js';
 
-import MessageReplayer from './lib/message_replayer';
-import MessageReplayerWebsocket from './lib/message_replayer_websocket';
+import MessageReplayer from './lib/message_replayer.js';
+import MessageReplayerWebsocket from './lib/message_replayer_websocket.js';
+
+const expect = chai.expect;
 
 // The main purpose of this test is to write admin information about the server to the test/tapes
 // directory, so that it is automatically documented for which version of janus-gateway we are

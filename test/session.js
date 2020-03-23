@@ -1,12 +1,14 @@
 /* eslint-disable prefer-arrow-callback, func-names */
 
-import { expect } from 'chai';
+import chai from 'chai';
 
-import Session from '../src/session-stamp';
-import BasePlugin from '../src/base-plugin-stamp';
+import Session from '../src/session-stamp.js';
+import BasePlugin from '../src/base-plugin-stamp.js';
 
-import MessageReplayer from './lib/message_replayer';
-import MessageReplayerWebsocket from './lib/message_replayer_websocket';
+import MessageReplayer from './lib/message_replayer.js';
+import MessageReplayerWebsocket from './lib/message_replayer_websocket.js';
+
+const expect = chai.expect;
 
 describe('Session', function () {
   let session;

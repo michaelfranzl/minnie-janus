@@ -1,4 +1,4 @@
-name: Node.js Package for registry.npmjs.org
+name: Node.js Package for npm.pkg.github.com
 
 on:
   release:
@@ -15,7 +15,7 @@ jobs:
       - run: npm ci
       - run: npm test
 
-  publish-npm:
+  publish-gpr:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -23,8 +23,10 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '13.11.0'
-          registry-url: https://registry.npmjs.org/
+          registry-url: https://npm.pkg.github.com/
+          scope: '@michaelfranzl'
       - run: npm ci
       - run: npm publish
+        working-directory: packages/server
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}

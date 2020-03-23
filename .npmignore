@@ -1,3 +1,9 @@
 .npmignore
 makedoc
 .github
+doc
+demo
+test
+jspm.json
+jsdoc-conf.json
+.eslintrc.json
