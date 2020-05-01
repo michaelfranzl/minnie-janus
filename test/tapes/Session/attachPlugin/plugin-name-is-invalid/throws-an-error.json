@@ -12,7 +12,7 @@
       "janus": "success",
       "transaction": "1",
       "data": {
-        "id": 5897960208291946
+        "id": 1728767642665455
       }
     }
   },
@@ -22,14 +22,14 @@
       "janus": "attach",
       "plugin": "invalid_plugin_name",
       "transaction": "2",
-      "session_id": 5897960208291946
+      "session_id": 1728767642665455
     }
   },
   {
     "incoming": true,
     "payload": {
       "janus": "error",
-      "session_id": 5897960208291946,
+      "session_id": 1728767642665455,
       "transaction": "2",
       "error": {
         "code": 460,
@@ -42,14 +42,14 @@
     "payload": {
       "janus": "destroy",
       "transaction": "3",
-      "session_id": 5897960208291946
+      "session_id": 1728767642665455
     }
   },
   {
     "incoming": true,
     "payload": {
       "janus": "success",
-      "session_id": 5897960208291946,
+      "session_id": 1728767642665455,
       "transaction": "3"
     }
   }

@@ -27,10 +27,11 @@ Usage of mini-janus is best illustrated by the full demo/example implementing th
 (included in Janus' source code). It can be found in the [demo](demo) subdirectory (see also
 [demo/README.md](demo/README.md) there).
 
-The implementation has been tested with the following janus-gateway versions:
+The implementation has been tested with the following `janus-gateway` versions:
 
-* 0.7.4
-* 0.8.1
+* 0.7
+* 0.8
+* 0.9
 
 
 ## How to use BasePlugin
