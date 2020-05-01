@@ -144,11 +144,13 @@ function init() {
 
   this.rtcconn = new RTCPeerConnection();
 
-  // RTCPeerconnection#onaddstream fires after the SDP answer has been set.
-  this.rtcconn.onaddstream = (event) => {
-    this.logger.info('RTCPeerConnection got remote media stream. Playing.');
-    this.vid_remote.srcObject = event.stream;
-    this.vid_remote.play();
+  this.mediaStream = new MediaStream();
+  this.vid_remote.srcObject = this.mediaStream;
+  this.vid_remote.play();
+
+  this.rtcconn.ontrack = (event) => {
+    this.logger.info(`RTCPeerConnection got remote ${event.track.kind} track.`);
+    this.mediaStream.addTrack(event.track);
   };
 
   // Send ICE events to Janus.
