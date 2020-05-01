@@ -3,8 +3,8 @@
 A minimal example demonstrating how you can use minnie-janus with the echotest plugin shipped with
 janus-gateway.
 
-The implementation has been manually tested and confirmed working with janus-gateway version tag
-0.7.4.
+The demo has been manually tested and confirmed working with `janus-gateway` versions 0.7, 0.8 and
+0.9.
 
 It will show two video elements on an otherwise empty page: On the left the local raw audio/video
 directly coming from the webcam, and on the right the audio/video echoed back by the server.
@@ -25,42 +25,40 @@ the development console as global variables `session` and `echotestPlugin`, for 
 
 
 ````javascript
-    echotestPlugin.enableVideo(false);
-    echotestPlugin.enableVideo(true);
-    echotestPlugin.enableAudio(false);
-    echotestPlugin.enableAudio(true);
-    echotestPlugin.setBitrate(100000); // bits/second
+echotestPlugin.enableVideo(false);
+echotestPlugin.enableVideo(true);
+echotestPlugin.enableAudio(false);
+echotestPlugin.enableAudio(true);
+echotestPlugin.setBitrate(100000); // bits/second
 
-    echotestPlugin.detach();
-    session.destroy();
+echotestPlugin.detach();
+session.destroy();
 ````
 
 ## How to run this demo
 
 Preconditions:
 
-1. The echotest demo (browser app) shipped with janus-gateway works.
-2. janus-gateway listens at `localhost` or somewhere in your LAN with all open UDP ports so that
-   there is no need for STUN/TURN servers.
-3. The websocket server of janus-gateway listens at ws://localhost:8188
-2. Your browser supports ES8 Javascript and Import Maps. At the time of writing, only Chrome version
-   74 has experimental support for Import Maps. Until Import Maps are enabled by default, enable
-   "Experimental Web Platform features" under `chrome://flags`.
+1. There should be no NAT or firewall between your host and Janus so that there is no need for STUN/TURN servers.
+2. The Websocket server of Janus listens at ws://localhost:8188 . If the URL is different, change
+   it in `demo/index.js`.
+3. The echotest demo (browser app) shipped with Janus works. This is to exclude potential problems
+   with `janus-gateway` itself.
+4. Compile and install `janus-rtpforward-plugin` (see [README.md](../README.md)).
+5. Use a fairly recent web browser (current Mozilla Firefox or Google Chrome works).
 
 In the root directory of `minnie-janus`:
 
-    npm install
-    npm install -g jspm@2.0.0-beta.7
-    jspm install
-    npm install -g http-server
-    http-server
+```bash
+npm ci
+npm install -g jspm@2.0.0-beta.7
+jspm install
+npm install -g http-server
+http-server
+```
 
-`http-server` will output a URL. Open it in your browser, e.g. `http://localhost:8080/demo/`. Give
-the browser access to your audio/video media. Open DevTools to inspect the console for problems.
+`http-server` will output a URL. Open it in your browser, e.g. `http://localhost:8080/demo/`.
+
+Give the browser access to your audio/video media. Then, open the browser's development console to look for potential errors or warnings.
+
 If everything works, you should see a local raw video and a remote echo of the video stream.
-
-## Development
-
-`importmap.json` was generated with:
-
-    jspm map ./demo/index.js -o demo/importmap.json --flat-scope --map-base .

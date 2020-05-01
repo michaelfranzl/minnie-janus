@@ -2,19 +2,20 @@
 <html>
   <head>
     <title>janus-gateway echotest with minnie-janus</title>
-  </head>
 
-  <!-- External Import Maps are not yet supported by browsers. In the meantime, we'll load an
-    Import Map like this: -->
-  <script>
-     (async () => {
-       document.head.appendChild(Object.assign(document.createElement('script'), {
-         type: 'importmap',
-         innerHTML: await (await fetch('./importmap.json')).text()
-       }));
-       import('./index.js');
-     })();
-  </script>
+    <!-- This is the future but not yet supported by browsers -->
+    <!-- <script type="importmap" src="importmap.js"></script> -->
+    <!-- <script type="module" src="index.js"></script> -->
+
+    <script type="systemjs-importmap" src="/demo/importmap.json"></script>
+    <script src="/node_modules/systemjs/dist/system.js"></script>
+    <script src="/node_modules/systemjs/dist/extras/transform.js"></script>
+    <script src="/node_modules/systemjs-transform-babel/dist/babel-transform.js"></script>
+
+    <script>
+      System.import('./index.js');
+    </script>
+  </head>
 
   <body>
   </body>
