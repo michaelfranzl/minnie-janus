@@ -1,6 +1,6 @@
 {
   "name": "minnie-janus",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "A small, modern, general interface for the Janus WebRTC gateway, written in ES8 Javascript for browsers and Node.js.",
   "scripts": {
     "test": "./node_modules/.bin/mocha --ui bdd-lazy-var/global"
