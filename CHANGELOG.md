@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Ran `npm audit fix`
 - The demo now supports all modern browsers, not just Google Chrome with experimental support for
   import maps.
 - Run automated tests against `janus-gateway` v0.9.2
