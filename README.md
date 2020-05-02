@@ -27,20 +27,16 @@ Usage of mini-janus is best illustrated by the full demo/example implementing th
 (included in Janus' source code). It can be found in the [demo](demo) subdirectory (see also
 [demo/README.md](demo/README.md) there).
 
-The implementation has been tested with the following `janus-gateway` versions:
+The implementation has been [automatically tested](test) against the following `janus-gateway` versions:
 
 * 0.7
 * 0.8
 * 0.9
 
 
-## How to use BasePlugin
+## Usage
 
-The 'echotest' [demo](demo) contained in this repository extends `BasePlugin` with plugin-specific
-behavior and exports a "Stamp", but also gives examples how to extend `BasePlugin` and return ...
+See:
 
-* a factory function,
-* a constructor function,
-* a class.
-
-By the way, "Stamps" are an awesome way to compose objects in OOP. See: https://github.com/stampit-org/stampit
+1. echotest [demo](demo) contained in this repository
+2. [janus-rtpforward-plugin demo](https://github.com/michaelfranzl/janus-rtpforward-plugin/tree/master/demo)
