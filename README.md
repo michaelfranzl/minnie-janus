@@ -1,6 +1,6 @@
 # minnie-janus
 
-![Test badge](https://github.com/michaelfranzl/minnie-janus/workflows/Test/badge.svg?branch=master)
+![Test badge](https://github.com/michaelfranzl/minnie-janus/actions/workflows/test.yml/badge.svg?branch=master)
 
 A small, modern, general interface module written in ES8 Javascript for the [Janus WebRTC gateway
 API](https://janus.conf.meetecho.com/docs/rest.html), for browsers as well as Node.js.
