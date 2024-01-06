@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
+## [v0.14.1] - 2024-01-06
+
+### Changed
+
+- Tested against janus-gateway v0.14.1
+- Modernized web app infrastructure of the demo
+- Cleaned main project dependencies
+
+
 ## [v0.9.4] - 2020-05-01
 
 ### Added

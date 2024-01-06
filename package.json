@@ -1,12 +1,12 @@
 {
   "name": "minnie-janus",
-  "version": "0.9.4",
+  "version": "0.14.1",
   "description": "A small, modern, general interface for the Janus WebRTC gateway, written in ES8 Javascript for browsers and Node.js.",
   "scripts": {
     "test": "./node_modules/.bin/mocha --ui bdd-lazy-var/global",
     "doc": "npx jsdoc --debug --verbose -c jsdoc-conf.json -d doc --access all src demo"
   },
-  "author": "Michael Karl Franzl",
+  "author": "Michael Franzl",
   "license": "MIT",
   "repository": {
     "type": "git",
