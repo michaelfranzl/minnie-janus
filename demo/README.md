@@ -48,10 +48,8 @@ Preconditions:
 In the root directory of `minnie-janus`:
 
 ```bash
-npm install -g jspm@2.0.0-beta.7 http-server
 npm ci
-jspm install
-http-server
+npm run dev
 ```
 
 `http-server` will output a URL. Open it in your browser and append `/demo`, e.g. `http://localhost:8080/demo/`.

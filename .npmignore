@@ -4,6 +4,5 @@ makedoc
 doc
 demo
 test
-jspm.json
 jsdoc-conf.json
 .eslintrc.json
