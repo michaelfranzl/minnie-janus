@@ -3,9 +3,6 @@
 A minimal example demonstrating how you can use `minnie-janus` with the `echotest` plugin shipped with
 `janus-gateway`.
 
-The demo has been manually tested and confirmed working with `janus-gateway` versions 0.7, 0.8 and
-0.9.
-
 It will show two video elements on an otherwise empty page. On the left: the local raw audio/video
 directly coming from the web cam; and on the right: the audio/video echoed back by the server.
 
@@ -42,16 +39,15 @@ Preconditions:
    with `janus-gateway` itself.
 2. There should be no NAT or firewall between your host and Janus so that there is no need for STUN/TURN servers.
 3. The Websocket server of Janus listens at ws://localhost:8188 . If the URL is different, change
-   it in `/demo/index.js`.
-4. Use a fairly recent web browser (current Mozilla Firefox or Google Chrome works).
+   it in `index.js`.
+4. Use a fairly recent web browser.
 
-In the root directory of `minnie-janus`:
+
+Then install dependencies and start the web server:
 
 ```bash
 npm ci
 npm run dev
 ```
 
-`http-server` will output a URL. Open it in your browser and append `/demo`, e.g. `http://localhost:8080/demo/`.
-
-Give the browser access to your audio/video media. Then, open the browser's development console to look for potential errors or warnings.
+Open the URL displayed in the terminal.
