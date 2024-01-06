@@ -1,0 +1,22 @@
+{
+  "name": "minnie-janus-demo",
+  "version": "1.0.0",
+  "description": "A minimal example demonstrating how you can use `minnie-janus` with the `echotest` plugin shipped with `janus-gateway`.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite"
+  },
+  "author": "Michael Franzl",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.11"
+  },
+  "workspaces": [
+    ".."
+  ],
+  "dependencies": {
+    "loglevel": "^1.8.1",
+    "minnie-janus": "^0.14.1",
+    "webrtc-adapter": "^8.2.3"
+  }
+}
