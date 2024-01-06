@@ -1,5 +1,4 @@
 .npmignore
-makedoc
 .github
 doc
 demo
