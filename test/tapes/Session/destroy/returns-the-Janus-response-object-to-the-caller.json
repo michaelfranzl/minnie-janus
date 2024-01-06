@@ -12,7 +12,7 @@
       "janus": "success",
       "transaction": "1",
       "data": {
-        "id": 7976529630458476
+        "id": 655289739809534
       }
     }
   },
@@ -21,14 +21,14 @@
     "payload": {
       "janus": "destroy",
       "transaction": "2",
-      "session_id": 7976529630458476
+      "session_id": 655289739809534
     }
   },
   {
     "incoming": true,
     "payload": {
       "janus": "success",
-      "session_id": 7976529630458476,
+      "session_id": 655289739809534,
       "transaction": "2"
     }
   }

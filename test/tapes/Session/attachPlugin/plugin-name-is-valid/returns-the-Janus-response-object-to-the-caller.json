@@ -12,7 +12,7 @@
       "janus": "success",
       "transaction": "1",
       "data": {
-        "id": 7665027664328328
+        "id": 1359247819838205
       }
     }
   },
@@ -22,17 +22,17 @@
       "janus": "attach",
       "plugin": "janus.plugin.echotest",
       "transaction": "2",
-      "session_id": 7665027664328328
+      "session_id": 1359247819838205
     }
   },
   {
     "incoming": true,
     "payload": {
       "janus": "success",
-      "session_id": 7665027664328328,
+      "session_id": 1359247819838205,
       "transaction": "2",
       "data": {
-        "id": 6979047818415394
+        "id": 2941443456170846
       }
     }
   },
@@ -40,16 +40,16 @@
     "incoming": false,
     "payload": {
       "janus": "detach",
-      "handle_id": 6979047818415394,
+      "handle_id": 2941443456170846,
       "transaction": "3",
-      "session_id": 7665027664328328
+      "session_id": 1359247819838205
     }
   },
   {
     "incoming": true,
     "payload": {
       "janus": "success",
-      "session_id": 7665027664328328,
+      "session_id": 1359247819838205,
       "transaction": "3"
     }
   },
@@ -58,22 +58,14 @@
     "payload": {
       "janus": "destroy",
       "transaction": "4",
-      "session_id": 7665027664328328
-    }
-  },
-  {
-    "incoming": true,
-    "payload": {
-      "janus": "detached",
-      "session_id": 7665027664328328,
-      "sender": 6979047818415394
+      "session_id": 1359247819838205
     }
   },
   {
     "incoming": true,
     "payload": {
       "janus": "success",
-      "session_id": 7665027664328328,
+      "session_id": 1359247819838205,
       "transaction": "4"
     }
   }

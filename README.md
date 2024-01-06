@@ -32,6 +32,7 @@ The implementation has been [automatically tested](test) against the following `
 * 0.7
 * 0.8
 * 0.9
+* 0.14
 
 
 ## Usage
