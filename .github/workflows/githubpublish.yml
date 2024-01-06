@@ -27,6 +27,5 @@ jobs:
           scope: '@michaelfranzl'
       - run: npm ci
       - run: npm publish
-        working-directory: packages/server
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
